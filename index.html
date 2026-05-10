@@ -1,96 +1,98 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>岩行记 | 用脚步丈量山野，用双手攀登绝壁</title>
-<link rel="stylesheet" href="css/style.css">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛰️</text></svg>">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>岩行记 | 用脚步丈量山野，用双手攀登绝壁</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛰️</text></svg>">
+    <meta http-equiv="Cache-Control" content="no-cache">
 </head>
 <body>
-<nav class="nav">
-<div class="nav-inner">
-<a href="index.html" class="nav-brand"><span>岩</span>行记</a>
-<div class="nav-links" id="navLinks">
-<a href="index.html" class="active">首页</a>
-<a href="blog.html">文章</a>
-<a href="yanxing.html">岩行中国</a>
-<a href="about.html">关于</a>
-</div>
-<button class="nav-toggle" onclick="document.getElementById('navLinks').classList.toggle('show')"><span></span><span></span><span></span></button>
-</div>
-</nav>
+    <nav class="nav">
+        <div class="nav-inner">
+            <a href="index.html" class="nav-brand"><span>岩</span>行记</a>
+            <div class="nav-links" id="navLinks">
+                <a href="index.html" class="active">首页</a>
+                <a href="blog.html">文章</a>
+                <a href="yanxing.html">岩行中国</a>
+                <a href="about.html">关于</a>
+            </div>
+            <button class="theme-btn" onclick="toggleTheme()" title="切换主题">🌙</button>
+            <button class="nav-toggle" onclick="document.getElementById('navLinks').classList.toggle('show')">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
 
-<section class="hero">
-<div class="hero-content">
-<p class="hero-label">Rock Climbing China</p>
-<h1 class="hero-title"><span class="g">岩</span>行记</h1>
-<p class="hero-sub">用脚步丈量山野，用双手攀登绝壁</p>
-<p class="hero-desc">22岁户外爱好者的成长记录。从徒步到攀岩，从山脚到岩壁。</p>
-<div class="hero-btns">
-<a href="blog.html" class="btn btn-g">阅读文章</a>
-<a href="yanxing.html" class="btn btn-o">岩行中国</a>
-</div>
-</div>
-</section>
+    <section class="hero">
+        <div class="hero-content">
+            <p class="hero-label">Rock Climbing China</p>
+            <h1 class="hero-title"><span class="gold">岩</span>行记</h1>
+            <p class="hero-sub">用脚步丈量山野，用双手攀登绝壁</p>
+            <p class="hero-desc">22岁户外爱好者的成长记录。从徒步到攀岩，从山脚到岩壁。</p>
+            <div class="hero-btns">
+                <a href="blog.html" class="btn btn-gold">阅读文章</a>
+                <a href="yanxing.html" class="btn btn-ghost">岩行中国</a>
+            </div>
+        </div>
+    </section>
 
-<section class="section">
-<div class="container">
-<div class="section-head">
-<h2 class="section-title">最新<span class="g">文章</span></h2>
-<a href="blog.html" class="section-link">查看全部 →</a>
-</div>
-<div class="posts-grid" id="latestPosts"></div>
-</div>
-</section>
+    <section class="section">
+        <div class="container">
+            <div class="section-head">
+                <h2 class="section-title">最新<span class="gold">文章</span></h2>
+                <a href="blog.html" class="section-link">查看全部 →</a>
+            </div>
+            <div class="posts-grid" id="latestPosts"></div>
+        </div>
+    </section>
 
-<section class="yanxing">
-<span class="badge">即将启程</span>
-<h2>《岩行中国》</h2>
-<p>走遍中国攀岩场地，用镜头记录每一次攀岩，用攻略帮助每一个想去的人。</p>
-<div class="stops">
-<div><span class="stop-num">01</span><span class="stop-label">江西</span></div>
-<div><span class="stop-num">02</span><span class="stop-label">广西</span></div>
-<div><span class="stop-num">03</span><span class="stop-label">贵州</span></div>
-<div><span class="stop-num">04</span><span class="stop-label">云南</span></div>
-<div><span class="stop-num">...</span><span class="stop-label">更多</span></div>
-</div>
-<a href="yanxing.html" class="btn btn-g">了解计划</a>
-</section>
+    <section class="yanxing">
+        <span class="yanxing-badge">即将启程</span>
+        <h2>《岩行中国》</h2>
+        <p>走遍中国攀岩场地，用镜头记录每一次攀岩，用攻略帮助每一个想去的人。</p>
+        <div class="stops">
+            <div><span class="stop-num">01</span><span class="stop-label">江西</span></div>
+            <div><span class="stop-num">02</span><span class="stop-label">广西</span></div>
+            <div><span class="stop-num">03</span><span class="stop-label">贵州</span></div>
+            <div><span class="stop-num">04</span><span class="stop-label">云南</span></div>
+            <div><span class="stop-num">...</span><span class="stop-label">更多</span></div>
+        </div>
+        <a href="yanxing.html" class="btn btn-gold">查看详情</a>
+    </section>
 
-<section class="section">
-<div class="container">
-<div class="about-section">
-<div class="about-text">
-<h2 class="section-title">关于<span class="g">我</span></h2>
-<p>22岁，从中部出发，走过北方、南方、西部。</p>
-<p>徒步3年，如今转身攀岩。</p>
-<p>在梅里雪山脚下工作过，在飞来寺交了一群朋友。</p>
-<a href="about.html" class="btn btn-o" style="margin-top:16px">了解更多</a>
-</div>
-<div class="stats">
-<div class="stat"><span class="stat-num">3</span><span class="stat-label">年户外</span></div>
-<div class="stat"><span class="stat-num">5.10a</span><span class="stat-label">攀岩水平</span></div>
-<div class="stat"><span class="stat-num">∞</span><span class="stat-label">热爱</span></div>
-</div>
-</div>
-</div>
-</section>
+    <section class="section">
+        <div class="container">
+            <div class="about-section">
+                <div class="about-text">
+                    <h2 class="section-title">关于<span class="gold">我</span></h2>
+                    <p>22岁，从中部出发，走过北方、南方、西部。</p>
+                    <p>徒步3年，如今转身攀岩。在梅里雪山脚下工作过，在飞来寺交了一群朋友。</p>
+                    <a href="about.html" class="btn btn-ghost" style="margin-top: 16px;">了解更多</a>
+                </div>
+                <div class="stats">
+                    <div class="stat"><span class="stat-num">3</span><span class="stat-label">年户外</span></div>
+                    <div class="stat"><span class="stat-num">5.10a</span><span class="stat-label">攀岩水平</span></div>
+                    <div class="stat"><span class="stat-num">∞</span><span class="stat-label">热爱</span></div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-<footer class="footer">
-<div class="container">
-<div class="footer-brand"><span>岩</span>行记</div>
-<div class="footer-links">
-<a href="index.html">首页</a>
-<a href="blog.html">文章</a>
-<a href="yanxing.html">岩行中国</a>
-<a href="about.html">关于</a>
-</div>
-<p class="footer-copy">© 2026 岩行记</p>
-</div>
-</footer>
-<script src="js/main.js"></script>
-<script>renderLatest()</script>
+    <footer class="footer">
+        <div class="footer-inner">
+            <div class="footer-brand"><span>岩</span>行记</div>
+            <div class="footer-links">
+                <a href="index.html">首页</a>
+                <a href="blog.html">文章</a>
+                <a href="yanxing.html">岩行中国</a>
+                <a href="about.html">关于</a>
+            </div>
+            <p class="footer-copy">© 2026 岩行记</p>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
 </body>
 </html>

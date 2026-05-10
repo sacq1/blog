@@ -1,299 +1,376 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>写文章 | 岩行记</title>
-<link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>写文章 | 岩行记</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛰️</text></svg>">
 </head>
 <body>
-<nav class="nav">
-<div class="nav-inner">
-<a href="index.html" class="nav-brand"><span>岩</span>行记</a>
-<div class="nav-links" id="navLinks">
-<a href="index.html">首页</a>
-<a href="blog.html">文章</a>
-<a href="yanxing.html">岩行中国</a>
-<a href="about.html">关于</a>
-</div>
-<button class="nav-toggle" onclick="document.getElementById('navLinks').classList.toggle('show')"><span></span><span></span><span></span></button>
-</div>
-</nav>
+    <nav class="nav">
+        <div class="nav-inner">
+            <a href="index.html" class="nav-brand"><span>岩</span>行记</a>
+            <div class="nav-links" id="navLinks">
+                <a href="index.html">首页</a>
+                <a href="blog.html">文章</a>
+                <a href="yanxing.html">岩行中国</a>
+                <a href="about.html">关于</a>
+            </div>
+            <button class="theme-btn" onclick="toggleTheme()" title="切换主题">🌙</button>
+            <button class="nav-toggle" onclick="document.getElementById('navLinks').classList.toggle('show')">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
 
-<section class="editor-wrap">
-<div class="editor-box">
+    <section class="editor-wrap">
+        <div class="editor-box">
+            <!-- 密码验证 -->
+            <div id="loginSection">
+                <div class="login-box">
+                    <h3>博主验证</h3>
+                    <p style="color: var(--text-dim); font-size: 0.85rem; margin-bottom: 20px;">请输入密码以进入文章编辑器</p>
+                    <input type="password" id="passwordInput" placeholder="输入密码..." onkeydown="if(event.key==='Enter')checkPassword()">
+                    <p class="error" id="loginError">密码错误，请重试</p>
+                    <button class="btn btn-gold" onclick="checkPassword()" style="width: 100%;">进入</button>
+                    <p style="margin-top: 16px;"><a href="about.html" style="color: var(--text-muted); font-size: 0.82rem;">← 返回关于页面</a></p>
+                </div>
+            </div>
 
-<!-- 密码验证 -->
-<div id="loginBox">
-<div class="login-box">
-<h3>博主验证</h3>
-<p style="color:var(--tx2);font-size:.85rem;margin-bottom:20px">请输入密码以进入文章编辑器</p>
-<input type="password" id="passInput" placeholder="输入密码..." onkeydown="if(event.key==='Enter')checkPass()">
-<p class="login-err" id="loginErr">密码错误，请重试</p>
-<button class="btn btn-g" onclick="checkPass()" style="width:100%">进入</button>
-<p style="margin-top:16px"><a href="about.html" style="color:var(--tx3);font-size:.82rem">← 返回关于页面</a></p>
-</div>
-</div>
+            <!-- 编辑器 -->
+            <div id="editorSection" style="display: none;">
+                <h1>写文章</h1>
+                <p>撰写文章，生成HTML代码后上传到GitHub发布。</p>
 
-<!-- 编辑器主体 -->
-<div id="editorMain" style="display:none">
+                <!-- 文章管理 -->
+                <div class="mgmt-section">
+                    <h3>文章管理</h3>
+                    <p style="color: var(--text-dim); font-size: 0.85rem; margin-bottom: 16px;">编辑下方 JSON 可隐藏/显示文章。设置 <code style="background:var(--bg); padding:2px 6px; border-radius:3px;">"hidden":true</code> 即可隐藏</p>
+                    <textarea class="json-editor" id="postsJson" onchange="savePostsData()"></textarea>
+                    <div class="form-actions" style="margin-top: 12px;">
+                        <button class="btn btn-gold btn-sm" onclick="savePostsData()">保存管理</button>
+                        <button class="btn btn-ghost btn-sm" onclick="exportPostsCode()">导出配置代码</button>
+                    </div>
+                    <p class="form-hint">修改后点击"保存管理"，首页和文章页会自动应用。导出配置代码可复制到 main.js 永久生效。</p>
+                </div>
 
-<h1>写文章</h1>
-<p>撰写文章，生成HTML代码后发布到博客。</p>
+                <div style="margin: 40px 0; border-top: 1px solid var(--border);"></div>
 
-<!-- 发布教程 -->
-<div class="tutorial">
-<h3>如何发布文章到 GitHub</h3>
-<ol>
-<li>
-<span class="step-title">第一步：在这里写好文章</span>
-<span class="step-desc">填写标题、分类、内容，点击「生成 HTML」按钮，复制生成的代码。</span>
-</li>
-<li>
-<span class="step-title">第二步：打开 GitHub 仓库</span>
-<span class="step-desc">访问 <a href="https://github.com/sacq1/blog" target="_blank" style="color:var(--gn)">github.com/sacq1/blog</a>，进入仓库页面。</span>
-</li>
-<li>
-<span class="step-title">第三步：进入 posts 文件夹</span>
-<span class="step-desc">点击 <code>posts</code> 文件夹，进入文章目录。</span>
-</li>
-<li>
-<span class="step-title">第四步：创建新文件</span>
-<span class="step-desc">点击右上角「Add file」→「Create new file」。</span>
-</li>
-<li>
-<span class="step-title">第五步：命名文件</span>
-<span class="step-desc">文件名输入 <code>你的文章名.html</code>（英文或拼音，如 <code>my-first-climb.html</code>）。</span>
-</li>
-<li>
-<span class="step-title">第六步：粘贴代码</span>
-<span class="step-desc">将复制的HTML代码粘贴到文件内容区域。</span>
-</li>
-<li>
-<span class="step-title">第七步：提交文件</span>
-<span class="step-desc">滚动到底部，点击绿色「Commit changes」按钮提交。</span>
-</li>
-<li>
-<span class="step-title">第八步：回到仓库根目录，更新文章列表</span>
-<span class="step-desc">打开 <code>js/main.js</code> 文件，在 <code>POSTS</code> 数组中添加新文章信息。点击编辑按钮（铅笔图标），修改后提交。</span>
-</li>
-</ol>
-<div class="tip">
-<strong>提示：</strong>添加文章信息时，格式如下：<br>
-<code>{ id: 4, title: '标题', excerpt: '摘要', date: '2026-05-10', category: '攀岩', emoji: '🧗', bg: 'linear-gradient(135deg, #2c1810, #1a1a2e)', url: 'posts/文件名.html', hidden: false }</code>
-</div>
-</div>
+                <!-- 写文章表单 -->
+                <div class="form-card">
+                    <div class="form-group">
+                        <label class="form-label">文章标题</label>
+                        <input type="text" class="form-input" id="pTitle" placeholder="输入文章标题...">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">副标题</label>
+                        <input type="text" class="form-input" id="pSubtitle" placeholder="一句话描述...">
+                    </div>
+                    <div class="form-inline">
+                        <div class="form-group" style="flex:1;">
+                            <label class="form-label">发布日期</label>
+                            <input type="date" class="form-input" id="pDate">
+                        </div>
+                        <div class="form-group" style="flex:1;">
+                            <label class="form-label">分类</label>
+                            <select class="form-select" id="pCat">
+                                <option>攀岩</option><option>徒步</option><option>攻略</option>
+                                <option>生活</option><option>绳索技术</option><option>装备</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="flex:1;">
+                            <label class="form-label">Emoji</label>
+                            <select class="form-select" id="pEmoji">
+                                <option>🧗</option><option>🏔️</option><option>🪢</option>
+                                <option>🥾</option><option>🗺️</option><option>💭</option>
+                                <option>📷</option><option>⛰️</option><option>🔥</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">背景色</label>
+                        <select class="form-select" id="pBg">
+                            <option value="linear-gradient(135deg, #2c1810, #1a1a2e)">深棕（攀岩）</option>
+                            <option value="linear-gradient(135deg, #1a2a3a, #0f3460)">深蓝（攻略）</option>
+                            <option value="linear-gradient(135deg, #3a1a1a, #5c1a1a)">暗红（绳索）</option>
+                            <option value="linear-gradient(135deg, #1a2e1a, #0f3d0f)">深绿（徒步）</option>
+                            <option value="linear-gradient(135deg, #2a1a3a, #3a2a5a)">暗紫（生活）</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">文章内容</label>
+                        <textarea class="form-textarea" id="pContent" placeholder="输入文章内容...&#10;&#10;支持格式：&#10;## 二级标题&#10;> 引用文字&#10;--- 分割线&#10;**加粗文字**"></textarea>
+                        <p class="form-hint">支持 ## 标题、> 引用、--- 分割线、**加粗**</p>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn btn-gold" onclick="generate()">生成 HTML</button>
+                        <button class="btn btn-ghost" onclick="preview()">预览</button>
+                        <button class="btn btn-ghost" onclick="clearForm()">清空</button>
+                    </div>
+                </div>
 
-<!-- 文章管理 -->
-<div class="manage-section">
-<h3 style="margin-bottom:20px">文章管理</h3>
-<div id="manageList"></div>
-</div>
+                <div class="output-section" id="previewBox" style="display: none;">
+                    <h3>预览</h3>
+                    <div class="article-body" id="previewArea" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px;"></div>
+                </div>
 
-<!-- 写文章表单 -->
-<div id="formSection" style="margin-top:40px">
-<h3 style="margin-bottom:20px">写文章</h3>
-<input type="hidden" id="editId" value="">
-<div class="form-card">
-<div class="form-group">
-<label class="form-label">文章标题</label>
-<input type="text" class="form-input" id="pTitle" placeholder="输入文章标题...">
-</div>
-<div class="form-group">
-<label class="form-label">副标题 / 摘要</label>
-<input type="text" class="form-input" id="pSubtitle" placeholder="一句话描述...">
-</div>
-<div class="form-group">
-<label class="form-label">发布日期</label>
-<input type="date" class="form-input" id="pDate">
-</div>
-<div class="form-group">
-<label class="form-label">分类</label>
-<select class="form-select" id="pCat">
-<option>攀岩</option>
-<option>徒步</option>
-<option>攻略</option>
-<option>生活</option>
-<option>绳索技术</option>
-<option>装备</option>
-</select>
-</div>
-<div class="form-group">
-<label class="form-label">文章内容</label>
-<textarea class="form-textarea" id="pContent" placeholder="输入文章内容...&#10;&#10;支持格式：&#10;## 二级标题&#10;> 引用文字&#10;--- 分割线&#10;**加粗文字**"></textarea>
-<p class="form-hint">支持 ## 标题、> 引用、--- 分割线、**加粗**</p>
-</div>
-<div class="form-actions">
-<button class="btn btn-g" onclick="genHTML()">生成 HTML</button>
-<button class="btn btn-o" onclick="previewArt()">预览</button>
-<button class="btn btn-o" onclick="saveDraft()">保存草稿</button>
-<button class="btn btn-o" onclick="clearForm()">清空</button>
-</div>
-</div>
-</div>
+                <div class="output-section" id="codeBox" style="display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <h3>HTML 代码</h3>
+                        <div>
+                            <span class="copy-ok" id="copyOk">已复制</span>
+                            <button class="btn btn-ghost btn-sm" onclick="copyCode()">复制代码</button>
+                        </div>
+                    </div>
+                    <pre class="code-block" id="codeOutput"></pre>
+                </div>
 
-<div class="output-section" id="previewBox" style="display:none">
-<h3>预览</h3>
-<div class="article-body" id="previewArea" style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:32px"></div>
-</div>
+                <!-- GitHub 上传教程 -->
+                <div class="tutorial">
+                    <h2>如何在 GitHub 中发布文章</h2>
+                    <div class="tutorial-steps">
+                        <div class="tutorial-step">
+                            <div class="tutorial-step-num">1</div>
+                            <div class="tutorial-step-body">
+                                <h4>打开 GitHub 仓库</h4>
+                                <p>访问你的博客仓库：<code>github.com/sacq1/blog</code>（或你改过用户名后的地址）</p>
+                            </div>
+                        </div>
 
-<div class="output-section" id="codeBox" style="display:none">
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-<h3>HTML 代码</h3>
-<div><span class="copy-ok" id="copyOk">已复制</span> <button class="btn btn-o btn-s" onclick="copyCode()">复制</button></div>
-</div>
-<pre class="code-block" id="codeOutput"></pre>
-<p class="form-hint" style="margin-top:12px">复制代码，按上方教程步骤发布到 GitHub。</p>
-</div>
+                        <div class="tutorial-step">
+                            <div class="tutorial-step-num">2</div>
+                            <div class="tutorial-step-body">
+                                <h4>进入 posts 文件夹</h4>
+                                <p>在仓库页面点击 <code>posts/</code> 文件夹进入。<br>首次需要自己创建这个文件夹：点击右上角 <strong>"Add file" → "Create new file"</strong>。</p>
+                            </div>
+                        </div>
 
-</div>
-</div>
-</section>
+                        <div class="tutorial-step">
+                            <div class="tutorial-step-num">3</div>
+                            <div class="tutorial-step-body">
+                                <h4>创建新文件</h4>
+                                <p>点击右上角 <strong>"Add file" → "Create new file"</strong>。<br>在文件名输入框中输入：<code>你的文章名.html</code>（比如 <code>my-first-climb.html</code>）<br>注意文件名必须用英文/拼音，不要用中文。</p>
+                            </div>
+                        </div>
 
-<footer class="footer"><div class="container"><div class="footer-brand"><span>岩</span>行记</div><p class="footer-copy">© 2026 岩行记</p></div></footer>
-<script src="js/main.js"></script>
-<script>
-// 密码验证
-function checkPass(){
-if(document.getElementById('passInput').value===ADMIN_PASS){
-sessionStorage.setItem('yxe','1');
-document.getElementById('loginBox').style.display='none';
-document.getElementById('editorMain').style.display='block';
-renderManage();
-}else{
-document.getElementById('loginErr').style.display='block';
-}
-}
-if(sessionStorage.getItem('yxe')==='1'){
-document.getElementById('loginBox').style.display='none';
-document.getElementById('editorMain').style.display='block';
-renderManage();
-}
+                        <div class="tutorial-step">
+                            <div class="tutorial-step-num">4</div>
+                            <div class="tutorial-step-body">
+                                <h4>粘贴 HTML 代码</h4>
+                                <p>将上面生成的 HTML 代码<b>全部复制</b>（点击"复制代码"按钮），粘贴到文件编辑器中。</p>
+                            </div>
+                        </div>
 
-document.getElementById('pDate').valueAsDate=new Date();
+                        <div class="tutorial-step">
+                            <div class="tutorial-step-num">5</div>
+                            <div class="tutorial-step-body">
+                                <h4>提交文件</h4>
+                                <p>在页面底部填写提交信息（如"添加新文章：xxx"），选择 <strong>"Commit directly to the main branch"</strong>，点击 <strong>"Commit new file"</strong>。</p>
+                            </div>
+                        </div>
 
-// Markdown解析
-function md(t){
-return t
-.replace(/^## (.+)$/gm,'<h2>$1</h2>')
-.replace(/^### (.+)$/gm,'<h3>$1</h3>')
-.replace(/^> (.+)$/gm,'<blockquote>$1</blockquote>')
-.replace(/^---$/gm,'<hr>')
-.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
-.split('\n\n').map(p=>{p=p.trim();if(p&&!p.startsWith('<'))return'<p>'+p.replace(/\n/g,'<br>')+'</p>';return p}).join('\n');
-}
+                        <div class="tutorial-step">
+                            <div class="tutorial-step-num">6</div>
+                            <div class="tutorial-step-body">
+                                <h4>更新文章列表</h4>
+                                <p>回到仓库首页，点击 <code>js/main.js</code> 文件。<br>在 <code>POSTS</code> 数组中添加你的新文章信息。<br>格式如下（复制并修改）：</p>
+                                <pre>{
+    title: '你的文章标题',
+    excerpt: '文章摘要（一句话）',
+    date: '2026-05-10',
+    category: '攀岩',
+    emoji: '🧗',
+    bg: 'linear-gradient(135deg, #2c1810, #1a1a2e)',
+    url: 'posts/xxx.html'
+},</pre>
+                                <p>点击 <strong>"Commit changes"</strong> 保存。等待1-2分钟，网站自动更新。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-// 生成HTML
-function genHTML(){
-const title=document.getElementById('pTitle').value;
-const sub=document.getElementById('pSubtitle').value;
-const date=document.getElementById('pDate').value;
-const cat=document.getElementById('pCat').value;
-const content=document.getElementById('pContent').value;
-if(!title||!content)return alert('请填写标题和内容');
+                <!-- 删除/隐藏文章教程 -->
+                <div class="tutorial" style="margin-top: 40px;">
+                    <h2>如何删除或隐藏文章</h2>
+                    <div class="tutorial-steps">
+                        <div class="tutorial-step">
+                            <div class="tutorial-step-num">1</div>
+                            <div class="tutorial-step-body">
+                                <h4>方法一：隐藏文章（推荐）</h4>
+                                <p>在上方"文章管理"区域中，找到你要隐藏的文章，设置 <code>"hidden":true</code>，然后点击"保存管理"。<br>文章文件还在，但不会在首页和文章列表中显示。</p>
+                            </div>
+                        </div>
+                        <div class="tutorial-step">
+                            <div class="tutorial-step-num">2</div>
+                            <div class="tutorial-step-body">
+                                <h4>方法二：完全删除</h4>
+                                <p>进入 GitHub 仓库 → <code>posts/</code> 文件夹 → 找到要删除的文章文件 → 点击右侧"..." → <strong>"Delete file"</strong> → Commit changes。<br>同时在 <code>js/main.js</code> 的 <code>POSTS</code> 数组中删除对应项。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-const d=new Date(date).toLocaleDateString('zh-CN',{year:'numeric',month:'long',day:'numeric'});
-const html=`<!DOCTYPE html>
+    <footer class="footer">
+        <div class="footer-inner">
+            <div class="footer-brand"><span>岩</span>行记</div>
+            <p class="footer-copy">© 2026 岩行记</p>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script>
+        const PASSWORD = 'LBS20040816';
+
+        // 密码验证
+        if (sessionStorage.getItem('editor_auth') === '1') {
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('editorSection').style.display = 'block';
+            loadPostsData();
+        }
+
+        function checkPassword() {
+            if (document.getElementById('passwordInput').value === PASSWORD) {
+                sessionStorage.setItem('editor_auth', '1');
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('editorSection').style.display = 'block';
+                loadPostsData();
+            } else {
+                document.getElementById('loginError').style.display = 'block';
+            }
+        }
+
+        document.getElementById('pDate').valueAsDate = new Date();
+
+        // 加载文章数据到管理区
+        function loadPostsData() {
+            document.getElementById('postsJson').value = JSON.stringify(POSTS, null, 2);
+        }
+
+        // 保存文章管理数据
+        function savePostsData() {
+            try {
+                const data = JSON.parse(document.getElementById('postsJson').value);
+                localStorage.setItem('blog_posts', JSON.stringify(data));
+                window.location.reload();
+                alert('已保存！页面将刷新以应用更改。');
+            } catch(e) {
+                alert('JSON 格式错误，请检查');
+            }
+        }
+
+        // 导出配置代码
+        function exportPostsCode() {
+            const code = 'const POSTS = ' + document.getElementById('postsJson').value + ';\n\n' +
+                '// 复制以上代码替换 js/main.js 中的 POSTS 数组';
+            navigator.clipboard.writeText(code).then(() => {
+                alert('代码已复制！请粘贴到 js/main.js 的 POSTS 数组中。');
+            });
+        }
+
+        function md(text) {
+            return text
+                .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+                .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+                .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
+                .replace(/^---$/gm, '<hr>')
+                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                .split('\n\n').map(p => {
+                    p = p.trim();
+                    if (p && !p.startsWith('<')) return '<p>' + p.replace(/\n/g, '<br>') + '</p>';
+                    return p;
+                }).join('\n');
+        }
+
+        function generate() {
+            const title = document.getElementById('pTitle').value;
+            const sub = document.getElementById('pSubtitle').value;
+            const date = document.getElementById('pDate').value;
+            const cat = document.getElementById('pCat').value;
+            const content = document.getElementById('pContent').value;
+            if (!title || !content) return alert('请填写标题和内容');
+
+            const d = new Date(date).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+            const html = `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>${title} | 岩行记</title>
-<link rel="stylesheet" href="../css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${title} | 岩行记</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛰️</text></svg>">
 </head>
 <body>
-<nav class="nav">
-<div class="nav-inner">
-<a href="../index.html" class="nav-brand"><span>岩</span>行记</a>
-<div class="nav-links">
-<a href="../index.html">首页</a>
-<a href="../blog.html">文章</a>
-<a href="../yanxing.html">岩行中国</a>
-<a href="../about.html">关于</a>
-</div>
-</div>
-</nav>
-<section class="article-head">
-<div class="container">
-<div class="post-meta"><span class="post-date">${d}</span><span class="post-tag">${cat}</span></div>
-<h1>${title}</h1>
-${sub?`<p class="subtitle">${sub}</p>`:''}
-</div>
-</section>
-<article class="article-body">
+    <nav class="nav">
+        <div class="nav-inner">
+            <a href="../index.html" class="nav-brand"><span>岩</span>行记</a>
+            <div class="nav-links">
+                <a href="../index.html">首页</a>
+                <a href="../blog.html">文章</a>
+                <a href="../yanxing.html">岩行中国</a>
+                <a href="../about.html">关于</a>
+            </div>
+            <button class="theme-btn" onclick="toggleTheme()" title="切换主题">🌙</button>
+        </div>
+    </nav>
+    <section class="article-head">
+        <div class="container">
+            <div class="post-meta"><span class="post-date">${d}</span><span class="post-tag">${cat}</span></div>
+            <h1>${title}</h1>
+            ${sub ? `<p class="subtitle">${sub}</p>` : ''}
+        </div>
+    </section>
+    <article class="article-body">
 ${md(content)}
-</article>
-<div class="article-nav"><a href="../blog.html">← 返回文章列表</a></div>
-<footer class="footer"><div class="container"><div class="footer-brand"><span>岩</span>行记</div><p class="footer-copy">© 2026 岩行记</p></div></footer>
-<script src="../js/main.js"><\/script>
+    </article>
+    <div class="article-nav"><a href="../blog.html">← 返回文章列表</a></div>
+    <footer class="footer">
+        <div class="footer-inner">
+            <div class="footer-brand"><span>岩</span>行记</div>
+            <p class="footer-copy">© 2026 岩行记</p>
+        </div>
+    </footer>
+    <script src="../js/main.js"><\/script>
 </body>
 </html>`;
 
-document.getElementById('codeOutput').textContent=html;
-document.getElementById('codeBox').style.display='block';
-document.getElementById('codeBox').scrollIntoView({behavior:'smooth'});
-}
+            document.getElementById('codeOutput').textContent = html;
+            document.getElementById('codeBox').style.display = 'block';
+            document.getElementById('codeBox').scrollIntoView({ behavior: 'smooth' });
+        }
 
-// 预览
-function previewArt(){
-const content=document.getElementById('pContent').value;
-const title=document.getElementById('pTitle').value;
-const sub=document.getElementById('pSubtitle').value;
-const date=document.getElementById('pDate').value;
-const cat=document.getElementById('pCat').value;
-if(!title||!content)return alert('请填写标题和内容');
-const d=new Date(date).toLocaleDateString('zh-CN',{year:'numeric',month:'long',day:'numeric'});
-document.getElementById('previewArea').innerHTML=`
-<div class="post-meta" style="margin-bottom:16px"><span class="post-date">${d}</span><span class="post-tag">${cat}</span></div>
-<h1 style="font-size:1.8rem;margin-bottom:12px">${title}</h1>
-${sub?`<p style="color:var(--tx2);margin-bottom:24px">${sub}</p>`:''}
-<hr>${md(content)}`;
-document.getElementById('previewBox').style.display='block';
-document.getElementById('previewBox').scrollIntoView({behavior:'smooth'});
-}
+        function preview() {
+            const title = document.getElementById('pTitle').value;
+            const sub = document.getElementById('pSubtitle').value;
+            const date = document.getElementById('pDate').value;
+            const cat = document.getElementById('pCat').value;
+            const content = document.getElementById('pContent').value;
+            if (!title || !content) return alert('请填写标题和内容');
+            const d = new Date(date).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+            document.getElementById('previewArea').innerHTML = `<div class="post-meta" style="margin-bottom:16px;"><span class="post-date">${d}</span><span class="post-tag">${cat}</span></div><h1 style="font-size:1.8rem;margin-bottom:12px;">${title}</h1>${sub?`<p style="color:var(--text-dim);margin-bottom:24px;">${sub}</p>`:''}<hr>${md(content)}`;
+            document.getElementById('previewBox').style.display = 'block';
+            document.getElementById('previewBox').scrollIntoView({ behavior: 'smooth' });
+        }
 
-// 复制代码
-function copyCode(){
-navigator.clipboard.writeText(document.getElementById('codeOutput').textContent).then(()=>{
-const ok=document.getElementById('copyOk');ok.style.display='inline';setTimeout(()=>ok.style.display='none',2000);
-});
-}
+        function copyCode() {
+            navigator.clipboard.writeText(document.getElementById('codeOutput').textContent).then(() => {
+                const ok = document.getElementById('copyOk');
+                ok.style.display = 'inline';
+                setTimeout(() => ok.style.display = 'none', 2000);
+            });
+        }
 
-// 保存草稿
-function saveDraft(){
-const draft={title:document.getElementById('pTitle').value,subtitle:document.getElementById('pSubtitle').value,date:document.getElementById('pDate').value,cat:document.getElementById('pCat').value,content:document.getElementById('pContent').value};
-localStorage.setItem('yxe_draft',JSON.stringify(draft));
-alert('草稿已保存');
-}
-
-// 加载草稿
-function loadDraft(){
-const d=localStorage.getItem('yxe_draft');
-if(d){
-const draft=JSON.parse(d);
-if(confirm('检测到未发布的草稿，是否恢复？')){
-document.getElementById('pTitle').value=draft.title||'';
-document.getElementById('pSubtitle').value=draft.subtitle||'';
-document.getElementById('pDate').value=draft.date||'';
-document.getElementById('pCat').value=draft.cat||'攀岩';
-document.getElementById('pContent').value=draft.content||'';
-}
-}
-}
-
-// 清空
-function clearForm(){
-if(confirm('确定清空？')){
-['pTitle','pSubtitle','pContent'].forEach(id=>document.getElementById(id).value='');
-document.getElementById('pDate').valueAsDate=new Date();
-document.getElementById('previewBox').style.display='none';
-document.getElementById('codeBox').style.display='none';
-document.getElementById('editId').value='';
-}
-}
-
-// 页面加载时检查草稿
-loadDraft();
-</script>
+        function clearForm() {
+            if (confirm('确定清空？')) {
+                ['pTitle', 'pSubtitle', 'pContent'].forEach(id => document.getElementById(id).value = '');
+                document.getElementById('pDate').valueAsDate = new Date();
+                document.getElementById('previewBox').style.display = 'none';
+                document.getElementById('codeBox').style.display = 'none';
+            }
+        }
+    </script>
 </body>
 </html>

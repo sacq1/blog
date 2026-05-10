@@ -1,12 +1,36 @@
-// ==================== 文章数据 ====================
-// 管理员密码
-const ADMIN_PASS = 'LBS20040816';
+// ==================== 主题切换 ====================
+function toggleTheme() {
+    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+    if (isLight) {
+        document.documentElement.removeAttribute('data-theme');
+        localStorage.setItem('theme', 'dark');
+    } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+        localStorage.setItem('theme', 'light');
+    }
+    updateThemeIcon();
+}
 
-// 文章列表 - 在这里添加新文章
-// hidden: true 表示隐藏文章
-let POSTS = [
+function updateThemeIcon() {
+    const btn = document.querySelector('.theme-btn');
+    if (!btn) return;
+    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+    btn.textContent = isLight ? '☀️' : '🌙';
+    btn.title = isLight ? '切换为深色模式' : '切换为浅色模式';
+}
+
+// 初始化主题
+(function initTheme() {
+    const saved = localStorage.getItem('theme');
+    if (saved === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+    }
+    updateThemeIcon();
+})();
+
+// ==================== 文章数据 ====================
+const DEFAULT_POSTS = [
     {
-        id: 1,
         title: '从徒步到攀岩，我决定去爬墙了',
         excerpt: '徒步走了3年，走过梅里雪山的冰川，走过齐云山的云海。直到有一天，我站在一面岩壁下面……',
         date: '2026-05-10',
@@ -17,7 +41,6 @@ let POSTS = [
         hidden: false
     },
     {
-        id: 2,
         title: '梅里雪山保姆级攻略',
         excerpt: '从交通到住宿，从路线到装备，一篇讲清楚梅里雪山怎么去、怎么看、花多少钱。',
         date: '2026-04-21',
@@ -28,7 +51,6 @@ let POSTS = [
         hidden: false
     },
     {
-        id: 3,
         title: '攀岩绳结入门：这5个绳结必须会',
         excerpt: '八字结、布林结、双套结、意大利半扣、抓结。掌握这5个，户外攀岩够用了。',
         date: '2026-04-15',
@@ -40,131 +62,98 @@ let POSTS = [
     }
 ];
 
-// 从 localStorage 加载文章数据
-function loadPosts() {
-    const saved = localStorage.getItem('yanxingji_posts');
-    if (saved) {
-        try {
+// 优先读取 localStorage 中的文章数据
+var POSTS = [];
+(function loadPosts() {
+    try {
+        const saved = localStorage.getItem('blog_posts');
+        if (saved) {
             POSTS = JSON.parse(saved);
-        } catch(e) {}
+        }
+    } catch(e) {}
+    if (!POSTS || POSTS.length === 0) {
+        POSTS = JSON.parse(JSON.stringify(DEFAULT_POSTS));
     }
-}
+})();
 
-// 保存文章数据到 localStorage
-function savePosts() {
-    localStorage.setItem('yanxingji_posts', JSON.stringify(POSTS));
-}
-
-// 初始化
-loadPosts();
-
-// ==================== 渲染文章列表 ====================
-function renderPosts(containerId, filter = 'all') {
-    const container = document.getElementById(containerId);
+// ==================== 渲染文章 ====================
+function renderPosts(containerId, filter) {
+    filter = filter || 'all';
+    var container = document.getElementById(containerId);
     if (!container) return;
 
-    const filtered = filter === 'all'
-        ? POSTS.filter(p => !p.hidden)
-        : POSTS.filter(p => p.category === filter && !p.hidden);
+    var filtered = filter === 'all' ? POSTS : POSTS.filter(function(p) {
+        return p.category === filter;
+    });
 
-    if (filtered.length === 0) {
-        container.innerHTML = '<p style="color:var(--tx3);text-align:center;padding:40px;">暂无文章</p>';
-        return;
+    // 排除隐藏文章
+    var showHidden = sessionStorage.getItem('editor_auth') === '1';
+    if (!showHidden) {
+        filtered = filtered.filter(function(p) { return !p.hidden; });
     }
 
-    container.innerHTML = filtered.map(p => {
-        const d = new Date(p.date).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
-        return `
-            <article class="post-card">
-                <div class="post-thumb" style="background:${p.bg}"><span>${p.emoji}</span></div>
-                <div class="post-body">
-                    <div class="post-meta">
-                        <span class="post-date">${d}</span>
-                        <span class="post-tag">${p.category}</span>
-                    </div>
-                    <h3 class="post-title">${p.title}</h3>
-                    <p class="post-excerpt">${p.excerpt}</p>
-                    <a href="${p.url}" class="post-more">阅读全文 →</a>
-                </div>
-            </article>
-        `;
+    container.innerHTML = filtered.map(function(p) {
+        var d = new Date(p.date).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+        var hiddenTag = (showHidden && p.hidden) ? '<span class="post-hidden-tag">已隐藏</span>' : '';
+        return '<article class="post-card' + (p.hidden && showHidden ? ' hidden-card' : '') + '" data-cat="' + p.category + '">' +
+            '<div class="post-thumb" style="background: ' + p.bg + ';">' +
+                '<span>' + p.emoji + '</span>' +
+            '</div>' +
+            '<div class="post-body">' +
+                '<div class="post-meta">' +
+                    '<span class="post-date">' + d + '</span>' +
+                    '<span class="post-tag">' + p.category + '</span>' +
+                    hiddenTag +
+                '</div>' +
+                '<h3 class="post-title">' + p.title + '</h3>' +
+                '<p class="post-excerpt">' + p.excerpt + '</p>' +
+                '<a href="' + p.url + '" class="post-more">阅读全文 →</a>' +
+            '</div>' +
+        '</article>';
     }).join('');
 }
 
-// 首页最新文章
+// 首页最新文章（显示前3条）
 function renderLatest() {
-    renderPosts('latestPosts');
-}
-
-// ==================== 文章管理 ====================
-function renderManage() {
-    const container = document.getElementById('manageList');
+    var container = document.getElementById('latestPosts');
     if (!container) return;
-
-    if (POSTS.length === 0) {
-        container.innerHTML = '<p style="color:var(--tx3);text-align:center;padding:20px;">暂无文章</p>';
-        return;
-    }
-
-    container.innerHTML = POSTS.map(p => {
-        const d = new Date(p.date).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
-        return `
-            <div class="manage-item ${p.hidden ? 'hidden' : ''}">
-                <div class="manage-info">
-                    <h4>${p.hidden ? '🔒 ' : ''}${p.title}</h4>
-                    <p>${d} · ${p.category} · ${p.hidden ? '已隐藏' : '已发布'}</p>
-                </div>
-                <div class="manage-actions">
-                    <button class="btn btn-o btn-s" onclick="editPost(${p.id})">修改</button>
-                    <button class="btn btn-o btn-s" onclick="toggleHide(${p.id})">${p.hidden ? '显示' : '隐藏'}</button>
-                    <button class="btn btn-d btn-s" onclick="deletePost(${p.id})">删除</button>
-                </div>
-            </div>
-        `;
+    // 排除隐藏文章
+    var visible = POSTS.filter(function(p) { return !p.hidden; });
+    container.innerHTML = visible.slice(0, 3).map(function(p) {
+        var d = new Date(p.date).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+        return '<article class="post-card">' +
+            '<div class="post-thumb" style="background: ' + p.bg + ';">' +
+                '<span>' + p.emoji + '</span>' +
+            '</div>' +
+            '<div class="post-body">' +
+                '<div class="post-meta">' +
+                    '<span class="post-date">' + d + '</span>' +
+                    '<span class="post-tag">' + p.category + '</span>' +
+                '</div>' +
+                '<h3 class="post-title">' + p.title + '</h3>' +
+                '<p class="post-excerpt">' + p.excerpt + '</p>' +
+                '<a href="' + p.url + '" class="post-more">阅读全文 →</a>' +
+            '</div>' +
+        '</article>';
     }).join('');
-}
-
-function toggleHide(id) {
-    const post = POSTS.find(p => p.id === id);
-    if (post) {
-        post.hidden = !post.hidden;
-        savePosts();
-        renderManage();
-    }
-}
-
-function deletePost(id) {
-    if (confirm('确定删除这篇文章？删除后无法恢复。')) {
-        POSTS = POSTS.filter(p => p.id !== id);
-        savePosts();
-        renderManage();
-    }
-}
-
-function editPost(id) {
-    const post = POSTS.find(p => p.id === id);
-    if (!post) return;
-
-    // 填充表单
-    document.getElementById('pTitle').value = post.title;
-    document.getElementById('pSubtitle').value = post.excerpt;
-    document.getElementById('pDate').value = post.date;
-    document.getElementById('pCat').value = post.category;
-    document.getElementById('editId').value = id;
-
-    // 滚动到表单
-    document.getElementById('formSection').scrollIntoView({ behavior: 'smooth' });
 }
 
 // ==================== 自动刷新 ====================
-let lastModified = null;
-function checkUpdate() {
-    fetch(window.location.href, { method: 'HEAD', cache: 'no-cache' })
-        .then(r => {
-            const m = r.headers.get('Last-Modified');
-            if (lastModified && m && lastModified !== m) location.reload();
-            lastModified = m;
-        })
-        .catch(() => {});
-}
-setInterval(checkUpdate, 60000);
+var lastCheck = Date.now();
+setInterval(function() {
+    var xhr = new XMLHttpRequest();
+    xhr.open('HEAD', window.location.href + '?t=' + Date.now(), true);
+    xhr.onload = function() {
+        var lm = xhr.getResponseHeader('Last-Modified');
+        if (lm && localStorage.getItem('last_modified') && lm !== localStorage.getItem('last_modified')) {
+            location.reload();
+        }
+        if (lm) localStorage.setItem('last_modified', lm);
+    };
+    xhr.send();
+}, 30000);
+
+// ==================== 初始化 ====================
+document.addEventListener('DOMContentLoaded', function() {
+    renderLatest();
+});
