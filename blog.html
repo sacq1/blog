@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>文章 | 岩行记</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛰️</text></svg>">
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+<a href="index.html" class="nav-brand"><span>岩</span>行记</a>
+<div class="nav-links" id="navLinks">
+<a href="index.html">首页</a>
+<a href="blog.html" class="active">文章</a>
+<a href="yanxing.html">岩行中国</a>
+<a href="about.html">关于</a>
+</div>
+<button class="nav-toggle" onclick="document.getElementById('navLinks').classList.toggle('show')"><span></span><span></span><span></span></button>
+</div>
+</nav>
+
+<section class="page-head"><div class="container"><h1>文章</h1><p>记录路上的风景与感悟</p></div></section>
+
+<section class="section">
+<div class="container">
+<div class="filters" id="filters">
+<button class="filter-btn active" data-cat="all">全部</button>
+<button class="filter-btn" data-cat="攀岩">攀岩</button>
+<button class="filter-btn" data-cat="徒步">徒步</button>
+<button class="filter-btn" data-cat="攻略">攻略</button>
+<button class="filter-btn" data-cat="生活">生活</button>
+<button class="filter-btn" data-cat="绳索技术">绳索技术</button>
+</div>
+<div class="posts-grid" id="postsGrid"></div>
+</div>
+</section>
+
+<footer class="footer"><div class="container"><div class="footer-brand"><span>岩</span>行记</div><p class="footer-copy">© 2026 岩行记</p></div></footer>
+<script src="js/main.js"></script>
+<script>
+renderPosts('postsGrid');
+document.getElementById('filters').addEventListener('click',e=>{
+if(e.target.classList.contains('filter-btn')){
+document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+e.target.classList.add('active');
+renderPosts('postsGrid',e.target.dataset.cat);
+}
+});
+</script>
+</body>
+</html>
