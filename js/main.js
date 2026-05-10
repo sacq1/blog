@@ -138,6 +138,32 @@ function renderLatest() {
     }).join('');
 }
 
+// ==================== 网站内容配置（可从编辑器修改）====================
+(function loadSiteConfig() {
+    try {
+        var cfg = localStorage.getItem('site_data');
+        if (!cfg) return;
+        cfg = JSON.parse(cfg);
+
+        if (cfg.heroDesc) {
+            var hd = document.querySelector('.hero-desc');
+            if (hd) hd.textContent = cfg.heroDesc;
+        }
+        if (cfg.heroTitle && document.querySelector('.hero-title')) {
+            var t = cfg.heroTitle;
+            document.querySelector('.hero-title').innerHTML = '<span class="gold">' + t.charAt(0) + '</span>' + t.slice(1);
+        }
+        if (cfg.heroSub) {
+            var hs = document.querySelector('.hero-sub');
+            if (hs) hs.textContent = cfg.heroSub;
+        }
+        if (cfg.aboutIntro) {
+            var ap = document.querySelector('.about-main p');
+            if (ap) ap.textContent = cfg.aboutIntro;
+        }
+    } catch(e) {}
+})();
+
 // ==================== 自动刷新 ====================
 var lastCheck = Date.now();
 setInterval(function() {

@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网站编辑 | 岩行记</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛰️</text></svg>">
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-inner">
+            <a href="index.html" class="nav-brand"><span>岩</span>行记</a>
+            <div class="nav-links">
+                <a href="index.html">首页</a>
+                <a href="blog.html">文章</a>
+                <a href="yanxing.html">岩行中国</a>
+                <a href="about.html">关于</a>
+            </div>
+            <button class="theme-btn" onclick="toggleTheme()" title="切换主题">🌙</button>
+        </div>
+    </nav>
+
+    <section class="editor-wrap">
+        <div class="editor-box">
+
+            <!-- 密码验证 -->
+            <div id="loginSection">
+                <div class="login-box">
+                    <h3>博主验证</h3>
+                    <p style="color: var(--text-dim); font-size: 0.85rem; margin-bottom: 20px;">请输入密码以进入网站编辑器</p>
+                    <input type="password" id="passwordInput" placeholder="输入密码..." onkeydown="if(event.key==='Enter')checkAuth()">
+                    <p class="error" id="loginError" style="display:none;">密码错误</p>
+                    <button class="btn btn-gold" onclick="checkAuth()" style="width:100%;">进入</button>
+                </div>
+            </div>
+
+            <!-- 编辑器主体 -->
+            <div id="editorMain" style="display:none;">
+
+                <!-- 标签栏 -->
+                <div class="filters" style="margin-bottom:32px">
+                    <button class="filter-btn active" onclick="switchTab('posts')">文章管理</button>
+                    <button class="filter-btn" onclick="switchTab('pages')">页面内容</button>
+                    <button class="filter-btn" onclick="switchTab('yanxing')">岩行中国</button>
+                    <button class="filter-btn" onclick="switchTab('export')">发布更新</button>
+                </div>
+
+                <!-- 文章管理 -->
+                <div id="tab-posts" class="tab-content">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+                        <h2>文章管理</h2>
+                        <button class="btn btn-gold btn-sm" onclick="addNewArticle()">+ 添加文章</button>
+                    </div>
+                    <div id="postsList"></div>
+                </div>
+
+                <!-- 页面内容 -->
+                <div id="tab-pages" class="tab-content" style="display:none">
+                    <h2>页面内容编辑</h2>
+                    <p style="color:var(--text-dim);margin-bottom:20px">修改首页、关于页面等固定内容</p>
+
+                    <div class="form-card">
+                        <div class="form-group">
+                            <label class="form-label">首页 Hero 描述</label>
+                            <input type="text" class="form-input" id="heroDesc" placeholder="22岁户外爱好者的成长记录...">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">关于页面 - 个人介绍</label>
+                            <textarea class="form-textarea" id="aboutIntro" placeholder="个人介绍内容..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">首页标题</label>
+                            <input type="text" class="form-input" id="heroTitle" placeholder="岩行">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">首页副标题</label>
+                            <input type="text" class="form-input" id="heroSub" placeholder="用脚步丈量山野...">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 岩行中国管理 -->
+                <div id="tab-yanxing" class="tab-content" style="display:none">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+                        <h2>岩行中国管理</h2>
+                        <button class="btn btn-gold btn-sm" onclick="addYxSpot()">+ 添加站点</button>
+                    </div>
+                    <div id="yxSpotsList"></div>
+                </div>
+
+                <!-- 发布更新 -->
+                <div id="tab-export" class="tab-content" style="display:none">
+                    <h2>发布更新</h2>
+                    <p style="color:var(--text-dim);margin-bottom:24px">生成完整的更新代码，复制到 GitHub 即可发布</p>
+
+                    <div class="form-card">
+                        <div class="form-group">
+                            <label class="form-label">选择要发布的文件</label>
+                            <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+                                <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                                    <input type="checkbox" id="exportPosts" checked> <span>文章列表 (js/main.js POSTS数组)</span>
+                                </label>
+                                <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                                    <input type="checkbox" id="exportPages"> <span>页面内容 (首页/关于/岩行中国)</span>
+                                </label>
+                            </div>
+                        </div>
+                        <button class="btn btn-gold" onclick="generateExport()">生成代码</button>
+                        <div class="output-section" id="exportArea" style="display:none">
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                                <h3>更新代码</h3>
+                                <div>
+                                    <span class="copy-ok" id="exportCopyOk" style="display:none">已复制</span>
+                                    <button class="btn btn-ghost btn-sm" onclick="copyExport()">复制</button>
+                                </div>
+                            </div>
+                            <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:12px">复制以下代码替换 <code style="background:var(--bg);padding:2px 6px;border-radius:3px;">js/main.js</code> 文件的对应部分，然后推送到 GitHub。</p>
+                            <pre class="code-block" id="exportCode"></pre>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-inner">
+            <div class="footer-brand"><span>岩</span>行记</div>
+            <p class="footer-copy">© 2026 岩行记</p>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script>
+        // ==================== 认证 ====================
+        var PASS = 'LBS20040816';
+        if (sessionStorage.getItem('site_editor_auth') === '1') {
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('editorMain').style.display = 'block';
+            initEditor();
+        }
+
+        function checkAuth() {
+            if (document.getElementById('passwordInput').value === PASS) {
+                sessionStorage.setItem('site_editor_auth', '1');
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('editorMain').style.display = 'block';
+                initEditor();
+            } else {
+                document.getElementById('loginError').style.display = 'block';
+            }
+        }
+
+        // ==================== 数据存储 ====================
+        var siteData = {};
+
+        function loadSiteData() {
+            try {
+                var d = localStorage.getItem('site_data');
+                if (d) siteData = JSON.parse(d);
+            } catch(e) { siteData = {}; }
+
+            if (!siteData.heroDesc) siteData.heroDesc = '22岁户外爱好者的成长记录。从徒步到攀岩，从山脚到岩壁。';
+            if (!siteData.heroTitle) siteData.heroTitle = '岩行记';
+            if (!siteData.heroSub) siteData.heroSub = '用脚步丈量山野，用双手攀登绝壁';
+            if (!siteData.aboutIntro) siteData.aboutIntro = '22岁，从中部出发，走过北方、南方、西部。\n徒步3年，走过梅里雪山的冰川，走过齐云山的云海，走过南太行的绝壁。\n如今转身攀岩。山，不一定只能用脚去丈量。';
+            if (!siteData.yxSpots) siteData.yxSpots = [];
+            if (!siteData.posts) {
+                siteData.posts = JSON.parse(JSON.stringify(POSTS));
+            }
+            saveSiteData();
+        }
+
+        function saveSiteData() {
+            localStorage.setItem('site_data', JSON.stringify(siteData));
+            // 同步文章数据
+            localStorage.setItem('blog_posts', JSON.stringify(siteData.posts));
+        }
+
+        // ==================== 标签切换 ====================
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(function(t) { t.style.display = 'none'; });
+            document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+            document.getElementById('tab-' + tab).style.display = 'block';
+            event.target.classList.add('active');
+        }
+
+        // ==================== 文章管理 ====================
+        function renderPostsList() {
+            var html = '<div style="display:flex;flex-direction:column;gap:16px">';
+            siteData.posts.forEach(function(p, i) {
+                var d = new Date(p.date).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+                html += '<div class="form-card" style="padding:20px;' + (p.hidden ? 'opacity:0.5' : '') + '">' +
+                    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">' +
+                        '<div>' +
+                            '<strong style="display:block;margin-bottom:4px">' + p.title + '</strong>' +
+                            '<span style="font-size:0.8rem;color:var(--text-muted)">' + p.emoji + ' ' + p.category + ' | ' + d + '</span>' +
+                            (p.hidden ? '<span style="font-size:0.75rem;color:#e94560;margin-left:8px">已隐藏</span>' : '') +
+                        '</div>' +
+                        '<div style="display:flex;gap:8px">' +
+                            '<button class="btn btn-ghost btn-sm" onclick="editArticle(' + i + ')">编辑</button>' +
+                            '<button class="btn btn-ghost btn-sm" onclick="toggleArticle(' + i + ')">' + (p.hidden ? '显示' : '隐藏') + '</button>' +
+                            '<button class="btn btn-ghost btn-sm" onclick="deleteArticle(' + i + ')" style="color:#e94560">删除</button>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>';
+            });
+            html += '</div>';
+            document.getElementById('postsList').innerHTML = html;
+        }
+
+        function addNewArticle() {
+            siteData.posts.unshift({
+                title: '新文章标题',
+                excerpt: '文章摘要...',
+                date: new Date().toISOString().split('T')[0],
+                category: '攀岩',
+                emoji: '🧗',
+                bg: 'linear-gradient(135deg, #2c1810, #1a1a2e)',
+                url: 'posts/new-article.html',
+                hidden: false
+            });
+            saveSiteData();
+            renderPostsList();
+            alert('新文章已添加！请点击"编辑"修改文章信息。\n然后去「写文章」页面生成 HTML 文件。');
+        }
+
+        function editArticle(i) {
+            var p = siteData.posts[i];
+            var newTitle = prompt('文章标题：', p.title);
+            if (newTitle === null) return;
+            p.title = newTitle;
+            var newExcerpt = prompt('文章摘要：', p.excerpt);
+            if (newExcerpt !== null) p.excerpt = newExcerpt;
+            var newCat = prompt('分类（攀岩/徒步/攻略/生活/绳索技术/装备）：', p.category);
+            if (newCat) p.category = newCat;
+            var newDate = prompt('日期（YYYY-MM-DD）：', p.date);
+            if (newDate) p.date = newDate;
+            var newUrl = prompt('文件路径：', p.url);
+            if (newUrl) p.url = newUrl;
+            saveSiteData();
+            renderPostsList();
+        }
+
+        function toggleArticle(i) {
+            siteData.posts[i].hidden = !siteData.posts[i].hidden;
+            saveSiteData();
+            renderPostsList();
+        }
+
+        function deleteArticle(i) {
+            if (confirm('确定删除「' + siteData.posts[i].title + '」？\n注意：只是从列表移除，GitHub 上的文章文件需要手动删除。')) {
+                siteData.posts.splice(i, 1);
+                saveSiteData();
+                renderPostsList();
+            }
+        }
+
+        // ==================== 岩行中国管理 ====================
+        function renderYxSpots() {
+            var html = '<div style="display:flex;flex-direction:column;gap:16px">';
+            if (!siteData.yxSpots) siteData.yxSpots = [];
+            siteData.yxSpots.forEach(function(s, i) {
+                html += '<div class="form-card" style="padding:20px">' +
+                    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">' +
+                        '<div>' +
+                            '<strong style="display:block;margin-bottom:4px">第' + (i+1) + '站：' + s.location + '</strong>' +
+                            '<span style="font-size:0.8rem;color:var(--text-muted)">' + s.title + '</span>' +
+                            '<span style="font-size:0.75rem;margin-left:8px;' + (s.status === 'done' ? 'color:#00c864' : 'color:var(--gold)') + '">' + (s.status === 'done' ? '已完成' : '计划中') + '</span>' +
+                        '</div>' +
+                        '<div style="display:flex;gap:8px">' +
+                            '<button class="btn btn-ghost btn-sm" onclick="editYxSpot(' + i + ')">编辑</button>' +
+                            '<button class="btn btn-ghost btn-sm" onclick="toggleYxSpot(' + i + ')">' + (s.status === 'done' ? '改计划' : '标完成') + '</button>' +
+                            '<button class="btn btn-ghost btn-sm" onclick="deleteYxSpot(' + i + ')" style="color:#e94560">删除</button>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>';
+            });
+            html += '</div>';
+            document.getElementById('yxSpotsList').innerHTML = html;
+        }
+
+        function addYxSpot() {
+            siteData.yxSpots.push({
+                location: '新站点',
+                title: '站点描述',
+                desc: '详细描述...',
+                status: 'plan',
+                tags: ['待定']
+            });
+            saveSiteData();
+            renderYxSpots();
+        }
+
+        function editYxSpot(i) {
+            var s = siteData.yxSpots[i];
+            var loc = prompt('地点名称：', s.location);
+            if (loc === null) return;
+            s.location = loc;
+            var title = prompt('标题/描述：', s.title);
+            if (title !== null) s.title = title;
+            var desc = prompt('详细描述：', s.desc || '');
+            if (desc !== null) s.desc = desc;
+            saveSiteData();
+            renderYxSpots();
+        }
+
+        function toggleYxSpot(i) {
+            siteData.yxSpots[i].status = siteData.yxSpots[i].status === 'done' ? 'plan' : 'done';
+            saveSiteData();
+            renderYxSpots();
+        }
+
+        function deleteYxSpot(i) {
+            if (confirm('确定删除？」siteData.yxSpots[i].location + '」？')) {
+                siteData.yxSpots.splice(i, 1);
+                saveSiteData();
+                renderYxSpots();
+            }
+        }
+
+        // ==================== 导出 ====================
+        function generateExport() {
+            var codes = [];
+            var exportPosts = document.getElementById('exportPosts').checked;
+            var exportPages = document.getElementById('exportPages').checked;
+
+            if (exportPosts) {
+                codes.push('// ==================== 文章数据（替换 main.js 中的 POSTS 数组）====================\n' +
+                    '// 第 1 步：打开 GitHub → repos → blog → js/main.js → 编辑\n' +
+                    '// 第 2 步：找到 "var DEFAULT_POSTS = [" 这行，用下面的代码替换整个数组\n' +
+                    '// 第 3 步：Commit changes → 等待 1-2 分钟自动生效\n\n' +
+                    'var DEFAULT_POSTS = ' + JSON.stringify(siteData.posts, null, 2) + ';');
+            }
+
+            if (exportPages) {
+                codes.push('// ==================== 页面内容（替换 main.js 中的 siteConfig）====================\n' +
+                    'var siteConfig = ' + JSON.stringify({
+                        heroDesc: document.getElementById('heroDesc').value,
+                        heroTitle: document.getElementById('heroTitle').value,
+                        heroSub: document.getElementById('heroSub').value,
+                        aboutIntro: document.getElementById('aboutIntro').value
+                    }, null, 2) + ';');
+            }
+
+            document.getElementById('exportCode').textContent = codes.join('\n\n// ================\n\n');
+            document.getElementById('exportArea').style.display = 'block';
+            document.getElementById('exportArea').scrollIntoView({ behavior: 'smooth' });
+            saveSiteData();
+        }
+
+        function copyExport() {
+            navigator.clipboard.writeText(document.getElementById('exportCode').textContent).then(function() {
+                var ok = document.getElementById('exportCopyOk');
+                ok.style.display = 'inline';
+                setTimeout(function() { ok.style.display = 'none'; }, 2000);
+            });
+        }
+
+        // ==================== 初始化 ====================
+        function initEditor() {
+            loadSiteData();
+            renderPostsList();
+            renderYxSpots();
+            document.getElementById('heroDesc').value = siteData.heroDesc;
+            document.getElementById('heroTitle').value = siteData.heroTitle;
+            document.getElementById('heroSub').value = siteData.heroSub;
+            document.getElementById('aboutIntro').value = siteData.aboutIntro;
+
+            // 自动保存
+            ['heroDesc','heroTitle','heroSub','aboutIntro'].forEach(function(id) {
+                var el = document.getElementById(id);
+                if (el) el.addEventListener('change', function() {
+                    siteData[id] = el.value;
+                    saveSiteData();
+                });
+            });
+        }
+    </script>
+</body>
+</html>
