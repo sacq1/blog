@@ -64,6 +64,8 @@ const DEFAULT_POSTS = [
 
 // 优先读取 localStorage 中的文章数据
 var POSTS = [];
+var SITE_POSTS = [];
+
 (function loadPosts() {
     try {
         const saved = localStorage.getItem('blog_posts');
@@ -74,6 +76,7 @@ var POSTS = [];
     if (!POSTS || POSTS.length === 0) {
         POSTS = JSON.parse(JSON.stringify(DEFAULT_POSTS));
     }
+    SITE_POSTS = POSTS;
 })();
 
 // ==================== 渲染文章 ====================
