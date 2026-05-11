@@ -1,139 +1,166 @@
 var ADMIN_PASS = 'LBS20040816';
 
-// ==================== 加载本地编辑的内容 ====================
+// 判断当前页面类型
+var isEditorPage = window.location.pathname.indexOf('editor.html') !== -1;
+var isSiteEditorPage = window.location.pathname.indexOf('site-editor.html') !== -1;
+
+// ==================== 应用本地编辑（普通用户可见） ====================
 (function applyEdits() {
-    if (sessionStorage.getItem('admin_auth') === '1') return;
+    if (isEditorPage || isSiteEditorPage) return;
     try {
-        // 加载页面文字编辑
         var edits = JSON.parse(localStorage.getItem('inline_edits') || '{}');
         if (edits.heroDesc) { var hd = document.querySelector('.hero-desc'); if (hd) hd.textContent = edits.heroDesc; }
         if (edits.heroSub) { var hs = document.querySelector('.hero-sub'); if (hs) hs.textContent = edits.heroSub; }
-        if (edits.heroTitle) { 
+        if (edits.heroTitle) {
             var ht = document.querySelector('.hero-title');
             if (ht) ht.innerHTML = '<span class="gold">' + edits.heroTitle.charAt(0) + '</span>' + edits.heroTitle.slice(1);
         }
-        // 加载关于页编辑
         document.querySelectorAll('.about-main p').forEach(function(p, i) {
             if (edits['aboutP' + i]) p.textContent = edits['aboutP' + i];
         });
-
-        // 加载文章编辑
-        var pdata = localStorage.getItem('site_edited_posts');
-        if (pdata && window.renderPosts) {
-            try {
-                var posts = JSON.parse(pdata);
-                window.SITE_POSTS = posts;
-                if (typeof renderPosts === 'function' && document.getElementById('postsGrid')) {
-                    renderPosts('postsGrid');
-                }
-                if (typeof renderLatest === 'function') {
-                    renderLatest();
-                }
-            } catch(e) {}
-        }
     } catch(e) {}
 })();
 
 // ==================== 管理员模式 ====================
-(function initAdminMode() {
-    var ia = sessionStorage.getItem('admin_auth') === '1';
-    if (!ia) { createLoginWidget(); return; }
+(function initAdmin() {
+    var isAdmin = sessionStorage.getItem('admin_auth') === '1';
 
-    // 注入编辑模式样式
-    var style = document.createElement('style');
-    style.textContent = '' +
-        '.admin-toolbar{position:fixed;top:0;left:0;right:0;z-index:9999;background:var(--bg-card);border-bottom:2px solid var(--gold);padding:6px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:0.82rem}' +
-        '.admin-toolbar span{color:var(--gold)}' +
-        '.editable{cursor:text;transition:all 0.2s;border-radius:4px;padding:2px 4px;margin:-2px -4px}' +
-        '.editable:hover{background:var(--gold-dim);outline:1px dashed var(--gold)}' +
-        '.editable:focus{background:var(--bg);outline:2px solid var(--gold);box-shadow:0 0 0 3px var(--gold-dim)}' +
-        'body.admin-active{padding-top:44px}';
-    document.head.appendChild(style);
-    document.body.classList.add('admin-active');
+    // 非管理页面：只显示登录入口
+    if (!isAdmin && !isEditorPage && !isSiteEditorPage) {
+        createLoginButton();
+        return;
+    }
 
-    // 工具栏
-    var bar = document.createElement('div');
-    bar.className = 'admin-toolbar';
-    bar.innerHTML = '<span>✏️ 编辑模式已启用</span>' +
-        '<button class="btn btn-ghost btn-sm" onclick="exportChanges()">导出修改</button>' +
-        '<button class="btn btn-ghost btn-sm" onclick="hidePostToggle()">显示/隐藏文章</button>' +
-        '<button class="btn btn-ghost btn-sm" onclick="exitAdminMode()">退出</button>' +
-        '<span style="font-size:0.75rem;color:var(--text-muted);margin-left:auto">点击页面上的文字直接修改</span>';
-    document.body.prepend(bar);
-
-    // 使内容可编辑
-    makeContentEditable();
+    // 已登录的管理页面：启用编辑模式
+    if (isAdmin && !isEditorPage && !isSiteEditorPage) {
+        enableEditMode();
+        return;
+    }
 })();
 
-// ==================== 使内容可编辑 ====================
-function makeContentEditable() {
-    // 英雄区域
-    markEditable('.hero-desc', 'heroDesc', true);
-    markEditable('.hero-sub', 'heroSub', true);
-    markEditable('.hero-title', 'heroTitle', true);
+// ==================== 登录按钮 ====================
+function createLoginButton() {
+    var html = '' +
+    '<div style="position:fixed;bottom:24px;right:24px;z-index:10000;">' +
+        '<button id="loginBtn" style="width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,0.1);background:var(--bg-card);color:var(--text-muted);cursor:pointer;font-size:1rem;box-shadow:var(--shadow);" title="站长登录">🔑</button>' +
+        '<div id="loginPopup" style="display:none;position:absolute;bottom:48px;right:0;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:16px;width:200px;box-shadow:var(--shadow);">' +
+            '<input type="password" id="loginPass" placeholder="站长密码" style="width:100%;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:0.85rem;margin-bottom:8px;outline:none;font-family:inherit;" onkeydown="if(event.key===\'Enter\')onLogin()">' +
+            '<button onclick="onLogin()" style="width:100%;padding:8px;background:var(--gold);color:#0c0c14;border:none;border-radius:4px;cursor:pointer;font-size:0.85rem;font-family:inherit;">进入编辑模式</button>' +
+        '</div>' +
+    '</div>';
+    document.body.insertAdjacentHTML('beforeend', html);
 
-    // 关于页段落
+    var btn = document.getElementById('loginBtn');
+    var popup = document.getElementById('loginPopup');
+    btn.onclick = function(e) {
+        e.stopPropagation();
+        popup.style.display = popup.style.display === 'none' ? 'block' : 'none';
+        if (popup.style.display === 'block') {
+            setTimeout(function() { document.getElementById('loginPass').focus(); }, 100);
+        }
+    };
+    document.addEventListener('click', function() { popup.style.display = 'none'; });
+}
+
+window.onLogin = function() {
+    var pass = document.getElementById('loginPass').value;
+    if (pass === ADMIN_PASS) {
+        sessionStorage.setItem('admin_auth', '1');
+        location.reload();
+    } else {
+        var inp = document.getElementById('loginPass');
+        inp.style.borderColor = '#e94560';
+        inp.value = '';
+        setTimeout(function() { inp.style.borderColor = ''; }, 1000);
+    }
+};
+
+// ==================== 编辑模式 ====================
+function enableEditMode() {
+    // CSS
+    var s = document.createElement('style');
+    s.textContent = '' +
+        '.admin-bar{position:fixed;top:0;left:0;right:0;z-index:9999;background:var(--bg-card);border-bottom:2px solid var(--gold);padding:6px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:0.82rem}' +
+        '.admin-bar b{color:var(--gold)}' +
+        '.editable{cursor:text;border-radius:4px;padding:2px 4px;margin:-2px -4px;transition:all 0.2s}' +
+        '.editable:hover{background:var(--gold-dim);outline:1px dashed var(--gold)}' +
+        '.editable:focus{background:var(--bg);outline:2px solid var(--gold);box-shadow:0 0 0 3px var(--gold-dim)}' +
+        'body.admin-on{padding-top:44px}' +
+        '.img-placeholder{display:inline-block;width:100%;min-height:120px;margin:8px 0;background:var(--gold-dim);border:2px dashed var(--gold);border-radius:8px;text-align:center;line-height:120px;color:var(--gold);cursor:pointer;font-size:0.85rem;transition:var(--trans)}' +
+        '.img-placeholder:hover{background:rgba(201,168,76,0.2)}' +
+        '.img-placeholder img{max-width:100%;display:block;border-radius:6px}';
+    document.head.appendChild(s);
+    document.body.classList.add('admin-on');
+
+    // 工具栏
+    var bar = '' +
+    '<div class="admin-bar">' +
+        '<b>✏️ 编辑模式</b>' +
+        '<button class="btn btn-ghost btn-sm" onclick="insertImage()">📷 插入图片</button>' +
+        '<button class="btn btn-ghost btn-sm" onclick="hidePostManager()">👁 文章显隐</button>' +
+        '<button class="btn btn-ghost btn-sm" onclick="exportEdits()">📤 导出</button>' +
+        '<a href="editor.html" class="btn btn-gold btn-sm" style="text-decoration:none;">写文章</a>' +
+        '<button class="btn btn-ghost btn-sm" onclick="sessionStorage.removeItem(\'admin_auth\');location.reload();" style="margin-left:auto;">退出</button>' +
+    '</div>';
+    document.body.insertAdjacentHTML('afterbegin', bar);
+
+    // 标记可编辑元素
+    setTimeout(makeEditable, 200);
+}
+
+function makeEditable() {
+    // 英雄区
+    tag('.hero-desc', 'heroDesc');
+    tag('.hero-sub', 'heroSub');
+    tag('.hero-title', 'heroTitle');
+    // 关于页
     document.querySelectorAll('.about-main p').forEach(function(p, i) {
         p.contentEditable = 'true';
         p.classList.add('editable');
-        p.dataset.editKey = 'aboutP' + i;
-        p.addEventListener('blur', saveAllEdits);
+        p.dataset.key = 'aboutP' + i;
+        p.onblur = saveEdits;
     });
-
-    // 文章标题/摘要
-    document.querySelectorAll('.post-title').forEach(function(el) {
+    // 文章卡片
+    document.querySelectorAll('.post-title').forEach(function(el, i) {
         el.contentEditable = 'true';
         el.classList.add('editable');
-        el.addEventListener('blur', savePostChanges);
+        el.onblur = savePosts;
     });
     document.querySelectorAll('.post-excerpt').forEach(function(el) {
         el.contentEditable = 'true';
         el.classList.add('editable');
-        el.addEventListener('blur', savePostChanges);
+        el.onblur = savePosts;
     });
-
-    // 岩行中国页面
-    document.querySelectorAll('.yx-spot-title').forEach(function(el) {
-        el.contentEditable = 'true';
-        el.classList.add('editable');
-    });
-    document.querySelectorAll('.yx-spot-desc').forEach(function(el) {
+    // 岩行中国
+    document.querySelectorAll('.yx-spot-title, .yx-spot-desc').forEach(function(el) {
         el.contentEditable = 'true';
         el.classList.add('editable');
     });
 }
 
-function markEditable(selector, key, saveOnBlur) {
+function tag(selector, key) {
     var el = document.querySelector(selector);
     if (!el) return;
     el.contentEditable = 'true';
     el.classList.add('editable');
-    el.dataset.editKey = key;
-    if (saveOnBlur) el.addEventListener('blur', saveAllEdits);
+    el.dataset.key = key;
+    el.onblur = saveEdits;
 }
 
-function saveAllEdits() {
+function saveEdits() {
     var data = {};
     try { data = JSON.parse(localStorage.getItem('inline_edits') || '{}'); } catch(e) {}
-    document.querySelectorAll('[data-edit-key]').forEach(function(el) {
-        // 对于 hero-title 特殊处理（保留 gold span）
-        if (el.dataset.editKey === 'heroTitle') {
-            data[el.dataset.editKey] = el.textContent.trim();
-        } else {
-            data[el.dataset.editKey] = el.textContent || el.innerText || '';
-        }
+    document.querySelectorAll('.editable[data-key]').forEach(function(el) {
+        data[el.dataset.key] = el.textContent.trim();
     });
     localStorage.setItem('inline_edits', JSON.stringify(data));
 }
 
-function savePostChanges() {
+function savePosts() {
     var cards = document.querySelectorAll('.post-card');
     var posts = [];
-    try { 
-        var saved = localStorage.getItem('site_edited_posts');
-        if (saved) posts = JSON.parse(saved);
-    } catch(e) {}
-    if (!posts.length) posts = JSON.parse(JSON.stringify(window.SITE_POSTS || POSTS || []));
+    try { posts = JSON.parse(localStorage.getItem('site_edited_posts')); } catch(e) {}
+    if (!posts || !posts.length) posts = JSON.parse(JSON.stringify(window.SITE_POSTS || window.POSTS || []));
 
     cards.forEach(function(card, i) {
         if (!posts[i]) posts[i] = {};
@@ -146,95 +173,95 @@ function savePostChanges() {
     localStorage.setItem('blog_posts', JSON.stringify(posts));
 }
 
-function hidePostToggle() {
-    var cards = document.querySelectorAll('.post-card');
+function hidePostManager() {
     var posts = [];
-    try {
-        var s = localStorage.getItem('site_edited_posts');
-        if (s) posts = JSON.parse(s);
-    } catch(e) {}
-    if (!posts.length) posts = JSON.parse(JSON.stringify(window.SITE_POSTS || POSTS || []));
+    try { posts = JSON.parse(localStorage.getItem('site_edited_posts')); } catch(e) {}
+    if (!posts || !posts.length) posts = JSON.parse(JSON.stringify(window.SITE_POSTS || window.POSTS || []));
 
-    var names = [];
-    posts.forEach(function(p, i) {
-        names.push((p.hidden ? '[隐藏] ' : '[显示] ') + p.title);
-    });
-    var choice = prompt('输入序号来切换隐藏/显示状态：\n\n' + names.map(function(n, i) { return i + ': ' + n; }).join('\n'));
-    if (choice !== null) {
+    var msg = posts.map(function(p, i) {
+        return i + ': ' + (p.hidden ? '[隐藏]' : '[显示]') + ' ' + p.title;
+    }).join('\n');
+
+    var choice = prompt('输入序号切换显隐，或输入 "del 序号" 删除：\n\n' + msg);
+    if (!choice) return;
+
+    if (choice.indexOf('del ') === 0) {
+        var idx = parseInt(choice.replace('del ', ''));
+        if (idx >= 0 && idx < posts.length) {
+            if (confirm('确定删除「' + posts[idx].title + '」？')) {
+                posts.splice(idx, 1);
+            }
+        }
+    } else {
         var idx = parseInt(choice);
         if (idx >= 0 && idx < posts.length) {
             posts[idx].hidden = !posts[idx].hidden;
-            localStorage.setItem('site_edited_posts', JSON.stringify(posts));
-            localStorage.setItem('blog_posts', JSON.stringify(posts));
-            alert('已' + (posts[idx].hidden ? '隐藏' : '显示') + '：' + posts[idx].title);
-            location.reload();
         }
     }
-}
-
-function exportChanges() {
-    var code = '';
-    var edits = localStorage.getItem('inline_edits');
-    if (edits) {
-        code += '// 页面内容（复制到 js/main.js 底部）\nvar siteConfig = ' + edits + ';\n\n';
-    }
-    var posts = localStorage.getItem('site_edited_posts');
-    if (posts) {
-        code += '// 文章列表（替换 js/main.js 中的 POSTS）\nvar POSTS = ' + posts + ';\n';
-    }
-    if (!code) { alert('没有需要导出的修改'); return; }
-    navigator.clipboard.writeText(code).then(function() {
-        alert('代码已复制！打开 GitHub → blog → js/main.js 粘贴替换即可。');
-    });
-}
-
-function exitAdminMode() {
-    sessionStorage.removeItem('admin_auth');
+    localStorage.setItem('site_edited_posts', JSON.stringify(posts));
+    localStorage.setItem('blog_posts', JSON.stringify(posts));
     location.reload();
 }
 
-// ==================== 登录小部件 ====================
-function createLoginWidget() {
-    var div = document.createElement('div');
-    div.id = 'loginWidget';
-    div.innerHTML = '' +
-    '<div style="position:fixed;bottom:24px;right:24px;z-index:10000;font-family:inherit;">' +
-        '<button id="showLoginBtn" style="width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--bg-card);color:var(--text-muted);cursor:pointer;font-size:1rem;transition:all 0.2s;box-shadow:var(--shadow);" title="站长登录">🔑</button>' +
-        '<div id="loginForm" style="display:none;position:absolute;bottom:48px;right:0;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:16px;width:200px;box-shadow:var(--shadow);">' +
-            '<input type="password" id="adminPass" placeholder="站长密码" style="width:100%;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:0.85rem;margin-bottom:8px;outline:none;font-family:inherit;">' +
-            '<button onclick="doAdminLogin()" style="width:100%;padding:8px;background:var(--gold);color:#0c0c14;border:none;border-radius:4px;cursor:pointer;font-size:0.85rem;font-family:inherit;">进入编辑模式</button>' +
-            '<p style="font-size:0.7rem;color:var(--text-muted);margin-top:8px;text-align:center;">登录后可编辑页面内容</p>' +
-        '</div>' +
+// ==================== 图片插入 ====================
+window.insertImage = function() {
+    var sel = window.getSelection();
+    var range = null;
+    try { range = sel.getRangeAt(0); } catch(e) {}
+
+    var url = prompt('输入图片地址（URL）：\n支持外链图片，如 Imgur、GitHub 图床等\nhttps://...');
+    if (!url) return;
+
+    var alt = prompt('图片描述（可选）：', '图片');
+
+    var imgHTML = '' +
+    '<div class="img-placeholder" contenteditable="false" style="margin:16px 0;">' +
+        '<img src="' + url + '" alt="' + (alt || '图片') + '" style="max-width:100%;border-radius:8px;display:block;">' +
+        '<div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px;text-align:center;">' + (alt || '图片') + '</div>' +
     '</div>';
-    document.body.appendChild(div);
 
-    var btn = document.getElementById('showLoginBtn');
-    var form = document.getElementById('loginForm');
-    btn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        form.style.display = form.style.display === 'none' ? 'block' : 'none';
-        if (form.style.display === 'block') {
-            setTimeout(function() { document.getElementById('adminPass').focus(); }, 100);
+    // 如果光标在可编辑区域内，插入图片
+    if (range && range.startContainer) {
+        var node = range.startContainer;
+        // 找到父级可编辑元素
+        while (node && node !== document.body) {
+            if (node.contentEditable === 'true' || node.classList.contains('editable')) {
+                // 在光标位置之后插入
+                range.collapse(false);
+                var temp = document.createElement('span');
+                temp.innerHTML = imgHTML;
+                range.insertNode(temp);
+                // 保存编辑
+                saveEdits();
+                savePosts();
+                return;
+            }
+            node = node.parentNode;
         }
-    });
-
-    var input = document.getElementById('adminPass');
-    input.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') doAdminLogin();
-    });
-
-    document.addEventListener('click', function() {
-        form.style.display = 'none';
-    });
-}
-
-function doAdminLogin() {
-    var pass = document.getElementById('adminPass').value;
-    if (pass === ADMIN_PASS) {
-        sessionStorage.setItem('admin_auth', '1');
-        location.reload();
-    } else {
-        document.getElementById('adminPass').style.borderColor = '#e94560';
-        setTimeout(function() { document.getElementById('adminPass').style.borderColor = ''; }, 1000);
     }
+
+    // 如果不在可编辑区域，在页面底部插入
+    var container = document.querySelector('.article-body') || document.querySelector('.about-main') || document.querySelector('.hero-content');
+    if (container) {
+        container.insertAdjacentHTML('beforeend', imgHTML);
+    }
+    saveEdits();
+    savePosts();
+};
+
+// ==================== 导出 ====================
+function exportEdits() {
+    var code = '';
+    var edits = localStorage.getItem('inline_edits');
+    if (edits) {
+        code += '// 页面内容\nvar siteConfig = ' + edits + ';\n\n';
+    }
+    var posts = localStorage.getItem('site_edited_posts');
+    if (posts) {
+        code += '// 文章列表（替换 js/main.js 中 DEFAULT_POSTS）\nvar DEFAULT_POSTS = ' + posts + ';\n';
+    }
+    if (!code) { alert('没有修改'); return; }
+    navigator.clipboard.writeText(code).then(function() {
+        alert('代码已复制！\n打开 GitHub → blog → js/main.js → 粘贴替换 → Commit');
+    });
 }

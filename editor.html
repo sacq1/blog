@@ -100,8 +100,9 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label">文章内容</label>
-                        <textarea class="form-textarea" id="pContent" placeholder="输入文章内容...&#10;&#10;支持格式：&#10;## 二级标题&#10;> 引用文字&#10;--- 分割线&#10;**加粗文字**"></textarea>
-                        <p class="form-hint">支持 ## 标题、> 引用、--- 分割线、**加粗**</p>
+                        <textarea class="form-textarea" id="pContent" placeholder="输入文章内容...&#10;&#10;支持格式：&#10;## 二级标题&#10;> 引用文字&#10;--- 分割线&#10;**加粗文字**&#10;[image:图片URL|描述] 插入图片&#10;"></textarea>
+                        <p class="form-hint">支持 ## 标题、> 引用、--- 分割线、**加粗**、[image:URL|描述] 插入图片</p>
+                        <button type="button" class="btn btn-ghost btn-sm" onclick="insertEditorImage()" style="margin-top:6px;">📷 插入图片</button>
                     </div>
                     <div class="form-actions">
                         <button class="btn btn-gold" onclick="generate()">生成 HTML</button>
@@ -222,7 +223,6 @@
     </footer>
 
     <script src="js/main.js"></script>
-    <script src="js/admin.js"></script>
     <script>
         const PASSWORD = 'LBS20040816';
 
@@ -246,6 +246,41 @@
 
         document.getElementById('pDate').valueAsDate = new Date();
 
+        // 插入图片到编辑器
+        function insertEditorImage() {
+            var url = prompt('输入图片地址（URL）：\n\n使用 Imgur、GitHub 图床或其他图片链接\nhttps://...');
+            if (!url) return;
+            var desc = prompt('图片描述（可选）：', '图片');
+            var tag = '[image:' + url + (desc ? '|' + desc : '') + ']';
+            var ta = document.getElementById('pContent');
+            var start = ta.selectionStart;
+            var end = ta.selectionEnd;
+            ta.value = ta.value.substring(0, start) + tag + ta.value.substring(end);
+            ta.focus();
+            ta.selectionStart = ta.selectionEnd = start + tag.length;
+        }
+
+        // Markdown 解析（支持图片）
+        function md(text) {
+            return text
+                .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+                .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+                .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
+                .replace(/^---$/gm, '<hr>')
+                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\[image:([^|\]]+)\|?([^\]]*)\]/g, function(m, url, desc) {
+                    return '<div style="margin:20px 0;text-align:center;">' +
+                        '<img src="' + url + '" alt="' + (desc || '图片') + '" style="max-width:100%;border-radius:8px;">' +
+                        (desc ? '<div style="font-size:0.8rem;color:#888;margin-top:6px;">' + desc + '</div>' : '') +
+                    '</div>';
+                })
+                .split('\n\n').map(function(p) {
+                    p = p.trim();
+                    if (p && p.indexOf('<') !== 0) return '<p>' + p.replace(/\n/g, '<br>') + '</p>';
+                    return p;
+                }).join('\n');
+        }
+
         // 加载文章数据到管理区
         function loadPostsData() {
             document.getElementById('postsJson').value = JSON.stringify(POSTS, null, 2);
@@ -256,8 +291,7 @@
             try {
                 const data = JSON.parse(document.getElementById('postsJson').value);
                 localStorage.setItem('blog_posts', JSON.stringify(data));
-                window.location.reload();
-                alert('已保存！页面将刷新以应用更改。');
+                location.reload();
             } catch(e) {
                 alert('JSON 格式错误，请检查');
             }
@@ -265,25 +299,11 @@
 
         // 导出配置代码
         function exportPostsCode() {
-            const code = 'const POSTS = ' + document.getElementById('postsJson').value + ';\n\n' +
-                '// 复制以上代码替换 js/main.js 中的 POSTS 数组';
+            const code = 'const POSTS = ' + document.getElementById('postsJson').value + ';\n\n// 复制以上代码替换 js/main.js 中的 POSTS 数组';
+            navigator.clipboard.writeText(code).then(function() { alert('代码已复制！'); });
             navigator.clipboard.writeText(code).then(() => {
                 alert('代码已复制！请粘贴到 js/main.js 的 POSTS 数组中。');
             });
-        }
-
-        function md(text) {
-            return text
-                .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-                .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-                .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
-                .replace(/^---$/gm, '<hr>')
-                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-                .split('\n\n').map(p => {
-                    p = p.trim();
-                    if (p && !p.startsWith('<')) return '<p>' + p.replace(/\n/g, '<br>') + '</p>';
-                    return p;
-                }).join('\n');
         }
 
         function generate() {

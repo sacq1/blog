@@ -184,5 +184,5 @@ setInterval(function() {
 
 // ==================== 初始化 ====================
 document.addEventListener('DOMContentLoaded', function() {
-    renderLatest();
+    try { renderLatest(); } catch(e) {}
 });
