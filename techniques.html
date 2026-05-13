@@ -53,60 +53,68 @@
         </div>
     </section>
 
-    <section class="section" id="uploadSection" style="display:none;">
-        <div class="container">
-            <div class="tech-upload-section">
-                <h2>上传新技术资料</h2>
-                <p>支持上传 PDF 文件或添加在线链接。PDF 将存储在浏览器本地，建议单个文件不超过 2MB。</p>
+    <!-- 上传弹窗 -->
+    <div id="uploadModal" class="modal-overlay" style="display:none;">
+        <div class="modal-box">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+                <h2 style="margin:0;">📤 上传技术资料</h2>
+                <button onclick="closeUploadModal()" class="modal-close">✕</button>
+            </div>
+            <p style="color:var(--text-dim);margin-bottom:24px;font-size:0.9rem;">上传 PDF 文件或添加在线链接。PDF 将存储在浏览器本地，建议单个文件不超过 2MB。</p>
 
-                <div class="form-card">
-                    <div class="form-group">
-                        <label class="form-label">资料标题</label>
-                        <input type="text" class="form-input" id="techTitle" placeholder="例如：攀岩绳结大全">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">描述说明</label>
-                        <textarea class="form-textarea" id="techDesc" placeholder="简要描述这份资料的内容..." style="min-height:80px;"></textarea>
-                    </div>
-                    <div class="form-inline">
-                        <div class="form-group" style="flex:1;">
-                            <label class="form-label">分类</label>
-                            <select class="form-select" id="techCat">
-                                <option>绳索技术</option><option>保护技术</option>
-                                <option>攀岩技巧</option><option>装备知识</option><option>其他</option>
-                            </select>
-                        </div>
-                        <div class="form-group" style="flex:1;">
-                            <label class="form-label">日期</label>
-                            <input type="date" class="form-input" id="techDate">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">PDF 文件（可选，二选一）</label>
-                        <div class="file-upload-box" id="fileDropZone" onclick="document.getElementById('pdfFileInput').click()">
-                            <div class="upload-icon">📄</div>
-                            <div class="upload-text">点击此处选择 PDF 文件，或将文件拖拽到这里</div>
-                            <div class="upload-hint">单个文件建议不超过 2MB</div>
-                            <input type="file" id="pdfFileInput" accept=".pdf" onchange="handleFileSelect(event)">
-                        </div>
-                        <div class="file-selected" id="fileSelected">
-                            <span class="file-name" id="selectedFileName"></span>
-                            <button class="file-remove" onclick="clearFile()" title="移除文件">✕</button>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">或填写在线链接（可选）</label>
-                        <input type="text" class="form-input" id="techUrl" placeholder="https://... 如果 PDF 已托管在其他地方，直接填写 URL">
-                    </div>
-
-                    <button class="btn btn-gold" onclick="uploadTechnique()">发布技术资料</button>
-                    <p class="form-hint" style="margin-top:8px;">上传后即时生效，所有访客均可下载。仅博主可在此上传。</p>
+            <div class="form-group">
+                <label class="form-label">资料标题</label>
+                <input type="text" class="form-input" id="modalTechTitle" placeholder="例如：攀岩绳结大全">
+            </div>
+            <div class="form-group">
+                <label class="form-label">描述说明</label>
+                <textarea class="form-textarea" id="modalTechDesc" placeholder="简要描述这份资料的内容..." style="min-height:60px;"></textarea>
+            </div>
+            <div class="form-inline">
+                <div class="form-group" style="flex:1;">
+                    <label class="form-label">分类</label>
+                    <select class="form-select" id="modalTechCat">
+                        <option>绳索技术</option><option>保护技术</option>
+                        <option>攀岩技巧</option><option>装备知识</option><option>其他</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex:1;">
+                    <label class="form-label">日期</label>
+                    <input type="date" class="form-input" id="modalTechDate">
                 </div>
             </div>
+
+            <div class="form-group">
+                <label class="form-label">选择 PDF 文件</label>
+                <div class="file-upload-box" id="modalDropZone" onclick="document.getElementById('modalPdfInput').click()">
+                    <div class="upload-icon">📄</div>
+                    <div class="upload-text">点击选择文件，或拖拽 PDF 到这里</div>
+                    <div class="upload-hint">建议不超过 2MB</div>
+                    <input type="file" id="modalPdfInput" accept=".pdf" onchange="handleModalFile(event)">
+                </div>
+                <div class="file-selected" id="modalFileSelected">
+                    <span class="file-name" id="modalFileName"></span>
+                    <button class="file-remove" onclick="clearModalFile()" title="移除">✕</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">或在线链接（可选）</label>
+                <input type="text" class="form-input" id="modalTechUrl" placeholder="https://... 直接填写 PDF 链接">
+            </div>
+
+            <div style="display:flex;gap:12px;margin-top:8px;">
+                <button class="btn btn-gold" onclick="publishFromModal()" style="flex:1;">发布到技术分享</button>
+                <button class="btn btn-ghost" onclick="closeUploadModal()">取消</button>
+            </div>
+            <p class="form-hint" style="margin-top:8px;text-align:center;">发布后即时生效，所有访客均可下载</p>
         </div>
-    </section>
+    </div>
+
+    <!-- 浮动上传按钮 -->
+    <div id="floatingUpload" style="position:fixed;bottom:24px;right:24px;z-index:10000;">
+        <button id="uploadFAB" style="width:48px;height:48px;border-radius:50%;border:1px solid rgba(201,168,76,0.3);background:var(--bg-card);color:var(--gold);cursor:pointer;font-size:1.3rem;box-shadow:0 2px 12px rgba(0,0,0,0.3);transition:all 0.3s;" title="上传技术资料" onclick="handleUploadClick()">📤</button>
+    </div>
 
     <!-- PDF 预览模态框 -->
     <div id="pdfModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:10001;background:rgba(0,0,0,0.85);" onclick="if(event.target===this)closePdfModal()">
@@ -241,57 +249,89 @@
         var selectedFileData = null;
         var selectedFileName = '';
 
+        // Modal drag & drop
         document.addEventListener('DOMContentLoaded', function() {
-            var dz = document.getElementById('fileDropZone');
+            var dz = document.getElementById('modalDropZone');
             if (dz) {
                 dz.addEventListener('dragover', function(e) { e.preventDefault(); dz.classList.add('dragover'); });
                 dz.addEventListener('dragleave', function() { dz.classList.remove('dragover'); });
                 dz.addEventListener('drop', function(e) {
                     e.preventDefault();
                     dz.classList.remove('dragover');
-                    if (e.dataTransfer.files.length) processFile(e.dataTransfer.files[0]);
+                    if (e.dataTransfer.files.length) processModalFile(e.dataTransfer.files[0]);
                 });
             }
         });
 
-        function handleFileSelect(event) {
+        function handleModalFile(event) {
             var f = event.target.files[0];
-            if (f) processFile(f);
+            if (f) processModalFile(f);
         }
 
-        function processFile(file) {
+        function processModalFile(file) {
             if (file.type !== 'application/pdf') { alert('仅支持 PDF 文件'); return; }
             if (file.size > 3 * 1024 * 1024) { alert('文件超过 3MB，建议压缩后再上传'); return; }
             selectedFileName = file.name;
             var reader = new FileReader();
             reader.onload = function(e) {
                 selectedFileData = e.target.result;
-                document.getElementById('selectedFileName').textContent = file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
-                document.getElementById('fileSelected').style.display = 'flex';
-                document.getElementById('fileDropZone').style.display = 'none';
+                document.getElementById('modalFileName').textContent = file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+                document.getElementById('modalFileSelected').style.display = 'flex';
+                document.getElementById('modalDropZone').style.display = 'none';
             };
             reader.readAsDataURL(file);
         }
 
-        function clearFile() {
+        function clearModalFile() {
             selectedFileData = null;
             selectedFileName = '';
-            document.getElementById('pdfFileInput').value = '';
-            document.getElementById('fileSelected').style.display = 'none';
-            document.getElementById('fileDropZone').style.display = 'block';
+            document.getElementById('modalPdfInput').value = '';
+            document.getElementById('modalFileSelected').style.display = 'none';
+            document.getElementById('modalDropZone').style.display = 'block';
         }
 
-        // ==================== 发布技术资料 ====================
-        function uploadTechnique() {
-            var title = document.getElementById('techTitle').value.trim();
-            var desc = document.getElementById('techDesc').value.trim();
-            var cat = document.getElementById('techCat').value;
-            var date = document.getElementById('techDate').value;
-            var url = document.getElementById('techUrl').value.trim();
+        // ==================== 上传弹窗 ====================
+        function handleUploadClick() {
+            if (!isAuthor) {
+                var pass = prompt('博主验证：请输入密码');
+                if (pass === TECH_PASS) {
+                    sessionStorage.setItem('techniques_auth', '1');
+                    isAuthor = true;
+                    renderTechniques();
+                    alert('验证成功！现在可以上传技术资料了。');
+                    openUploadModal();
+                } else if (pass !== null) {
+                    alert('密码错误');
+                }
+                return;
+            }
+            openUploadModal();
+        }
+
+        function openUploadModal() {
+            document.getElementById('modalTechDate').valueAsDate = new Date();
+            document.getElementById('uploadModal').style.display = 'flex';
+            document.getElementById('modalTechTitle').focus();
+        }
+
+        function closeUploadModal() {
+            document.getElementById('uploadModal').style.display = 'none';
+            document.getElementById('modalTechTitle').value = '';
+            document.getElementById('modalTechDesc').value = '';
+            document.getElementById('modalTechUrl').value = '';
+            clearModalFile();
+        }
+
+        function publishFromModal() {
+            var title = document.getElementById('modalTechTitle').value.trim();
+            var desc = document.getElementById('modalTechDesc').value.trim();
+            var cat = document.getElementById('modalTechCat').value;
+            var date = document.getElementById('modalTechDate').value;
+            var url = document.getElementById('modalTechUrl').value.trim();
 
             if (!title) { alert('请填写资料标题'); return; }
             if (!desc) { alert('请填写描述说明'); return; }
-            if (!selectedFileData && !url) { alert('请上传 PDF 文件或填写在线链接'); return; }
+            if (!selectedFileData && !url) { alert('请选择 PDF 文件或填写在线链接'); return; }
             if (!date) { alert('请选择日期'); return; }
 
             var entry = {
@@ -308,18 +348,17 @@
 
             TECHNIQUES.unshift(entry);
             saveTechniques();
-            resetUploadForm();
+            closeUploadModal();
             renderTechniques();
             alert('技术资料发布成功！');
         }
 
-        function resetUploadForm() {
-            document.getElementById('techTitle').value = '';
-            document.getElementById('techDesc').value = '';
-            document.getElementById('techUrl').value = '';
-            document.getElementById('techDate').valueAsDate = new Date();
-            clearFile();
-        }
+        // 点击遮罩关闭弹窗
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('uploadModal').addEventListener('click', function(e) {
+                if (e.target === this) closeUploadModal();
+            });
+        });
 
         function deleteTechnique(index) {
             if (!confirm('确定删除「' + TECHNIQUES[index].title + '」？')) return;
@@ -336,42 +375,16 @@
                 e.target.classList.add('active');
                 renderTechniques(e.target.dataset.cat);
             });
-
-            document.getElementById('techDate').valueAsDate = new Date();
         });
 
         // ==================== 作者登录 ====================
         if (sessionStorage.getItem('techniques_auth') === '1') {
             isAuthor = true;
-            document.getElementById('uploadSection').style.display = 'block';
-        }
-
-        function showAuthorLogin() {
-            var pass = prompt('博主验证：请输入密码');
-            if (pass === TECH_PASS) {
-                sessionStorage.setItem('techniques_auth', '1');
-                isAuthor = true;
-                document.getElementById('uploadSection').style.display = 'block';
-                renderTechniques();
-                alert('验证成功！现在可以上传技术资料了。');
-            } else if (pass !== null) {
-                alert('密码错误');
-            }
         }
 
         // ==================== 初始化 ====================
         loadTechniques();
         renderTechniques();
-
-        // 在页面底部添加博主上传入口
-        if (!isAuthor) {
-            var entry = '' +
-            '<div style="text-align:center;padding:40px 0;">' +
-                '<p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:12px;">博主专用</p>' +
-                '<button class="btn btn-ghost btn-sm" onclick="showAuthorLogin()">📤 上传技术资料</button>' +
-            '</div>';
-            document.querySelector('.section .container').insertAdjacentHTML('beforeend', entry);
-        }
 
         // 键盘快捷键关闭模态框
         document.addEventListener('keydown', function(e) {

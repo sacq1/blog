@@ -408,7 +408,7 @@
         }
 
         function deleteYxSpot(i) {
-            if (confirm('确定删除？」siteData.yxSpots[i].location + '」？')) {
+            if (confirm('确定删除「' + siteData.yxSpots[i].location + '」？')) {
                 siteData.yxSpots.splice(i, 1);
                 saveSiteData();
                 renderYxSpots();
