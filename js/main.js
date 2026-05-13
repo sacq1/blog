@@ -48,7 +48,7 @@ const DEFAULT_POSTS = [
         "emoji": "🧗",
         "bg": "linear-gradient(135deg, #2c1810, #1a1a2e)",
         "url": "posts/hiking-to-climbing.html",
-        "hidden": false
+        "hidden": true
     },
     {
         "title": "梅里雪山保姆级攻略",
