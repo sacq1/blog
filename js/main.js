@@ -31,34 +31,44 @@ function updateThemeIcon() {
 // ==================== 文章数据 ====================
 const DEFAULT_POSTS = [
     {
-        title: '从徒步到攀岩，我决定去爬墙了',
-        excerpt: '徒步走了3年，走过梅里雪山的冰川，走过齐云山的云海。直到有一天，我站在一面岩壁下面……',
-        date: '2026-05-10',
-        category: '攀岩',
-        emoji: '🧗',
-        bg: 'linear-gradient(135deg, #2c1810, #1a1a2e)',
-        url: 'posts/hiking-to-climbing.html',
-        hidden: false
+        "title": "1",
+        "excerpt": "1",
+        "date": "2026-05-13",
+        "category": "攀岩",
+        "emoji": "🧗",
+        "bg": "linear-gradient(135deg, #2c1810, #1a1a2e)",
+        "url": "posts/ceshi.html",
+        "hidden": false
     },
     {
-        title: '梅里雪山保姆级攻略',
-        excerpt: '从交通到住宿，从路线到装备，一篇讲清楚梅里雪山怎么去、怎么看、花多少钱。',
-        date: '2026-04-21',
-        category: '攻略',
-        emoji: '🏔️',
-        bg: 'linear-gradient(135deg, #1a2a3a, #0f3460)',
-        url: 'posts/meili-snow-mountain.html',
-        hidden: false
+        "title": "从徒步到攀岩，我决定去爬墙了",
+        "excerpt": "徒步走了3年，走过梅里雪山的冰川，走过齐云山的云海。直到有一天，我站在一面岩壁下面……",
+        "date": "2026-05-10",
+        "category": "攀岩",
+        "emoji": "🧗",
+        "bg": "linear-gradient(135deg, #2c1810, #1a1a2e)",
+        "url": "posts/hiking-to-climbing.html",
+        "hidden": false
     },
     {
-        title: '攀岩绳结入门：这5个绳结必须会',
-        excerpt: '八字结、布林结、双套结、意大利半扣、抓结。掌握这5个，户外攀岩够用了。',
-        date: '2026-04-15',
-        category: '绳索技术',
-        emoji: '🪢',
-        bg: 'linear-gradient(135deg, #3a1a1a, #5c1a1a)',
-        url: 'posts/essential-knots.html',
-        hidden: false
+        "title": "梅里雪山保姆级攻略",
+        "excerpt": "从交通到住宿，从路线到装备，一篇讲清楚梅里雪山怎么去、怎么看、花多少钱。",
+        "date": "2026-04-21",
+        "category": "攻略",
+        "emoji": "🏔️",
+        "bg": "linear-gradient(135deg, #1a2a3a, #0f3460)",
+        "url": "posts/meili-snow-mountain.html",
+        "hidden": false
+    },
+    {
+        "title": "攀岩绳结入门：这5个绳结必须会",
+        "excerpt": "八字结、布林结、双套结、意大利半扣、抓结。掌握这5个，户外攀岩够用了。",
+        "date": "2026-04-15",
+        "category": "绳索技术",
+        "emoji": "🪢",
+        "bg": "linear-gradient(135deg, #3a1a1a, #5c1a1a)",
+        "url": "posts/essential-knots.html",
+        "hidden": false
     }
 ];
 
