@@ -58,7 +58,7 @@ const DEFAULT_POSTS = [
         "emoji": "🏔️",
         "bg": "linear-gradient(135deg, #1a2a3a, #0f3460)",
         "url": "posts/meili-snow-mountain.html",
-        "hidden": false
+        "hidden": true
     },
     {
         "title": "攀岩绳结入门：这5个绳结必须会",
@@ -68,7 +68,7 @@ const DEFAULT_POSTS = [
         "emoji": "🪢",
         "bg": "linear-gradient(135deg, #3a1a1a, #5c1a1a)",
         "url": "posts/essential-knots.html",
-        "hidden": false
+        "hidden": true
     }
 ];
 
