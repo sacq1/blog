@@ -29,7 +29,7 @@
     <section class="page-head">
         <div class="container">
             <h1>攀岩技术分享</h1>
-            <p>绳索技术、保护技术、攀岩技巧、装备知识 —— 用 PDF 沉淀知识，自由下载学习</p>
+            <p>攀岩技术、绳索技术知识 —— 用 PDF 沉淀知识，自由下载学习</p>
         </div>
     </section>
 
@@ -37,10 +37,8 @@
         <div class="container">
             <div class="tech-categories" id="techCategories">
                 <button class="filter-btn active" data-cat="all">全部</button>
+                <button class="filter-btn" data-cat="攀岩技术">攀岩技术</button>
                 <button class="filter-btn" data-cat="绳索技术">绳索技术</button>
-                <button class="filter-btn" data-cat="保护技术">保护技术</button>
-                <button class="filter-btn" data-cat="攀岩技巧">攀岩技巧</button>
-                <button class="filter-btn" data-cat="装备知识">装备知识</button>
                 <button class="filter-btn" data-cat="其他">其他</button>
             </div>
 
@@ -106,7 +104,7 @@
         }
 
         // ==================== 渲染技术卡片 ====================
-        var iconMap = { '绳索技术': '🪢', '保护技术': '🛡️', '攀岩技巧': '🧗', '装备知识': '🎒', '其他': '📖' };
+        var iconMap = { '攀岩技术': '🧗', '绳索技术': '🪢', '其他': '📖' };
         var currentFilter = 'all';
 
         function renderTechniques(filter) {
