@@ -100,7 +100,7 @@ function enableEditMode() {
         '<button class="btn btn-ghost btn-sm" onclick="insertImage()">📷 插入图片</button>' +
         '<button class="btn btn-ghost btn-sm" onclick="hidePostManager()">👁 文章显隐</button>' +
         '<button class="btn btn-ghost btn-sm" onclick="exportEdits()">📤 导出</button>' +
-        '<a href="editor.html" class="btn btn-gold btn-sm" style="text-decoration:none;">写文章</a>' +
+        '<a href="admin.html" class="btn btn-gold btn-sm" style="text-decoration:none;">管理后台</a>' +
         '<button class="btn btn-ghost btn-sm" onclick="sessionStorage.removeItem(\'admin_auth\');location.reload();" style="margin-left:auto;">退出</button>' +
     '</div>';
     document.body.insertAdjacentHTML('afterbegin', bar);

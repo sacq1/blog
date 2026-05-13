@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理后台 | 岩行记</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛰️</text></svg>">
+    <style>
+        .admin-tabs { display:flex; gap:6px; margin-bottom:28px; flex-wrap:wrap; border-bottom:1px solid var(--border); padding-bottom:16px; }
+        .admin-tab { padding:8px 20px; background:transparent; border:1px solid var(--border); border-radius:6px 6px 0 0; color:var(--text-dim); font-size:0.85rem; cursor:pointer; transition:var(--trans); font-family:inherit; margin-bottom:-1px; }
+        .admin-tab:hover { color:var(--gold); border-color:rgba(201,168,76,0.3); }
+        .admin-tab.active { background:var(--bg-card); color:var(--gold); border-color:var(--border); border-bottom-color:var(--bg-card); }
+        .tab-body { display:none; }
+        .tab-body.active { display:block; }
+        .item-row { display:flex; justify-content:space-between; align-items:center; padding:16px 20px; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:10px; transition:var(--trans); }
+        .item-row:hover { border-color:rgba(201,168,76,0.3); }
+        .item-row.hidden-item { opacity:0.5; }
+        .item-info { flex:1; min-width:0; }
+        .item-info strong { display:block; margin-bottom:4px; font-size:0.95rem; }
+        .item-info .meta { font-size:0.78rem; color:var(--text-muted); }
+        .item-actions { display:flex; gap:6px; flex-shrink:0; margin-left:16px; }
+        .item-actions .btn { padding:5px 12px; font-size:0.75rem; }
+        .status-badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:0.7rem; margin-left:8px; }
+        .badge-published { background:rgba(0,200,100,0.15); color:#00c864; }
+        .badge-draft { background:var(--gold-dim); color:var(--gold); }
+        .badge-hidden { background:rgba(233,69,96,0.15); color:#e94560; }
+        .empty-state { text-align:center; padding:48px; color:var(--text-muted); }
+        .empty-state .icon { font-size:3rem; margin-bottom:12px; }
+        .token-box { background:var(--bg-card); border:1px solid var(--gold); border-radius:var(--radius); padding:24px; margin-bottom:28px; }
+        .token-box h3 { color:var(--gold); margin-bottom:8px; }
+        .toast { position:fixed; top:20px; left:50%; transform:translateX(-50%); z-index:99999; background:var(--gold); color:#0c0c14; padding:10px 24px; border-radius:8px; font-size:0.88rem; font-weight:500; box-shadow:0 4px 20px rgba(0,0,0,0.3); display:none; }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-inner">
+            <a href="index.html" class="nav-brand"><span>岩</span>行记</a>
+            <div class="nav-links" id="navLinks">
+                <a href="index.html">首页</a>
+                <a href="blog.html">文章</a>
+                <a href="techniques.html">技术分享</a>
+                <a href="yanxing.html">岩行中国</a>
+                <a href="about.html">关于</a>
+            </div>
+            <button class="theme-btn" onclick="toggleTheme()" title="切换主题">🌙</button>
+            <button class="nav-toggle" onclick="document.getElementById('navLinks').classList.toggle('show')">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <section class="page-head">
+        <div class="container">
+            <h1>管理后台</h1>
+            <p>编辑内容后直接推送到 GitHub，自动发布到网站</p>
+        </div>
+    </section>
+
+    <section class="section" style="padding-top:0;">
+        <div class="container">
+
+            <!-- GitHub Token Setup -->
+            <div class="token-box" id="tokenBox">
+                <h3>🔐 GitHub 访问令牌</h3>
+                <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:16px;">
+                    需要 GitHub Personal Access Token 才能推送更新。<br>
+                    <a href="https://github.com/settings/tokens/new?scopes=repo&description=岩行记管理后台" target="_blank" style="color:var(--gold);">点此创建 Token</a>
+                    （勾选 repo 权限，生成后粘贴下方）
+                </p>
+                <div style="display:flex;gap:10px;">
+                    <input type="password" id="githubToken" class="form-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" style="flex:1;">
+                    <button class="btn btn-gold" onclick="saveToken()">保存令牌</button>
+                </div>
+                <p style="color:var(--text-muted);font-size:0.75rem;margin-top:8px;">令牌仅存储在浏览器会话中，关闭浏览器后需重新输入</p>
+            </div>
+
+            <!-- Main Editor (hidden until token) -->
+            <div id="adminMain" style="display:none;">
+
+                <div class="admin-tabs" id="adminTabs">
+                    <button class="admin-tab active" data-tab="articles">📝 文章管理</button>
+                    <button class="admin-tab" data-tab="techniques">📚 技术分享</button>
+                    <button class="admin-tab" data-tab="pages">🏠 页面内容</button>
+                    <button class="admin-tab" data-tab="yanxing">🗺️ 岩行中国</button>
+                </div>
+
+                <div id="toast" class="toast"></div>
+
+                <!-- Articles Tab -->
+                <div class="tab-body active" id="tab-articles">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                        <h2>文章管理</h2>
+                        <div style="display:flex;gap:8px;">
+                            <button class="btn btn-gold btn-sm" onclick="openArticleEditor()">+ 写新文章</button>
+                            <button class="btn btn-ghost btn-sm" onclick="pullArticles()">🔄 从 GitHub 拉取</button>
+                        </div>
+                    </div>
+                    <div id="articlesList"><div class="empty-state"><div class="icon">📝</div><p>点击"从 GitHub 拉取"加载文章列表</p></div></div>
+                </div>
+
+                <!-- Techniques Tab -->
+                <div class="tab-body" id="tab-techniques">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                        <h2>技术分享管理</h2>
+                        <div style="display:flex;gap:8px;">
+                            <button class="btn btn-gold btn-sm" onclick="openTechEditor()">+ 添加技术资料</button>
+                            <button class="btn btn-ghost btn-sm" onclick="pullTechniques()">🔄 从 GitHub 拉取</button>
+                        </div>
+                    </div>
+                    <div id="techniquesList"><div class="empty-state"><div class="icon">📚</div><p>点击"从 GitHub 拉取"加载技术资料列表</p></div></div>
+                </div>
+
+                <!-- Pages Tab -->
+                <div class="tab-body" id="tab-pages">
+                    <h2>页面内容编辑</h2>
+                    <p style="color:var(--text-dim);margin-bottom:20px;">修改首页、关于页面等固定内容，然后推送到 GitHub。</p>
+                    <div class="form-card">
+                        <div class="form-group">
+                            <label class="form-label">首页 Hero 描述</label>
+                            <input type="text" class="form-input" id="heroDesc" placeholder="22岁户外爱好者的成长记录...">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">首页标题</label>
+                            <input type="text" class="form-input" id="heroTitle" placeholder="岩行记">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">首页副标题</label>
+                            <input type="text" class="form-input" id="heroSub" placeholder="用脚步丈量山野...">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">关于页面 - 个人介绍</label>
+                            <textarea class="form-textarea" id="aboutIntro" placeholder="个人介绍内容..."></textarea>
+                        </div>
+                        <div style="display:flex;gap:8px;">
+                            <button class="btn btn-gold" onclick="pushPages()">推送到 GitHub</button>
+                            <button class="btn btn-ghost" onclick="pullPages()">从 GitHub 拉取</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Yanxing Tab -->
+                <div class="tab-body" id="tab-yanxing">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                        <h2>岩行中国管理</h2>
+                        <div style="display:flex;gap:8px;">
+                            <button class="btn btn-gold btn-sm" onclick="addYxSpot()">+ 添加站点</button>
+                            <button class="btn btn-ghost btn-sm" onclick="pullYanxing()">从 GitHub 拉取</button>
+                        </div>
+                    </div>
+                    <div id="yanxingList"><div class="empty-state"><div class="icon">🗺️</div><p>点击"从 GitHub 拉取"加载岩行中国数据</p></div></div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Article Editor Modal -->
+    <div id="articleModal" class="modal-overlay" style="display:none;">
+        <div class="modal-box" style="max-width:700px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+                <h2 style="margin:0;" id="articleModalTitle">写新文章</h2>
+                <button onclick="closeArticleModal()" class="modal-close">✕</button>
+            </div>
+            <div class="form-group"><label class="form-label">文章标题 *</label><input type="text" class="form-input" id="artTitle"></div>
+            <div class="form-group"><label class="form-label">副标题</label><input type="text" class="form-input" id="artSubtitle"></div>
+            <div class="form-inline">
+                <div class="form-group" style="flex:1;"><label class="form-label">分类</label><select class="form-select" id="artCat"><option>攀岩</option><option>徒步</option><option>攻略</option><option>生活</option><option>绳索技术</option><option>装备</option></select></div>
+                <div class="form-group" style="flex:1;"><label class="form-label">日期</label><input type="date" class="form-input" id="artDate"></div>
+                <div class="form-group" style="flex:1;"><label class="form-label">Emoji</label><select class="form-select" id="artEmoji"><option>🧗</option><option>🏔️</option><option>🪢</option><option>🥾</option><option>🗺️</option><option>📷</option><option>⛰️</option></select></div>
+            </div>
+            <div class="form-group"><label class="form-label">文章摘要（显示在列表卡片中）*</label><textarea class="form-textarea" id="artExcerpt" style="min-height:60px;"></textarea></div>
+            <div class="form-group"><label class="form-label">文件名（英文+数字，不含空格）*</label><input type="text" class="form-input" id="artSlug" placeholder="my-first-climb"><span class="form-hint">生成的 HTML 文件将保存在 posts/ 目录</span></div>
+            <div class="form-group"><label class="form-label">文章正文</label><textarea class="form-textarea" id="artContent" placeholder="## 标题&#10;正文内容...&#10;&#10;支持格式：## 标题 | > 引用 | --- 分割线 | **加粗** | [image:URL|描述]"></textarea></div>
+            <input type="hidden" id="artEditIndex" value="-1">
+            <div style="display:flex;gap:12px;margin-top:8px;">
+                <button class="btn btn-gold" onclick="saveArticle()" style="flex:1;">保存并推送到 GitHub</button>
+                <button class="btn btn-ghost" onclick="closeArticleModal()">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Technique Editor Modal -->
+    <div id="techModal" class="modal-overlay" style="display:none;">
+        <div class="modal-box" style="max-width:520px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+                <h2 style="margin:0;" id="techModalTitle">添加技术资料</h2>
+                <button onclick="closeTechModal()" class="modal-close">✕</button>
+            </div>
+            <div class="form-group"><label class="form-label">资料标题 *</label><input type="text" class="form-input" id="techTitle2"></div>
+            <div class="form-group"><label class="form-label">描述说明 *</label><textarea class="form-textarea" id="techDesc2" style="min-height:60px;"></textarea></div>
+            <div class="form-inline">
+                <div class="form-group" style="flex:1;"><label class="form-label">分类</label><select class="form-select" id="techCat2"><option>绳索技术</option><option>保护技术</option><option>攀岩技巧</option><option>装备知识</option><option>其他</option></select></div>
+                <div class="form-group" style="flex:1;"><label class="form-label">日期</label><input type="date" class="form-input" id="techDate2"></div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">PDF 文件</label>
+                <div class="file-upload-box" id="adminDropZone" onclick="document.getElementById('adminPdfInput').click()">
+                    <div class="upload-icon">📄</div><div class="upload-text">点击选择 PDF 文件</div><div class="upload-hint">建议不超过 2MB，将直接上传到 GitHub</div>
+                    <input type="file" id="adminPdfInput" accept=".pdf" onchange="handleAdminFile(event)">
+                </div>
+                <div class="file-selected" id="adminFileSelected">
+                    <span class="file-name" id="adminFileName"></span>
+                    <button class="file-remove" onclick="clearAdminFile()">✕</button>
+                </div>
+            </div>
+            <div class="form-group"><label class="form-label">或在线 PDF 链接</label><input type="text" class="form-input" id="techUrl2" placeholder="https://..."></div>
+            <input type="hidden" id="techEditIndex" value="-1">
+            <div style="display:flex;gap:12px;margin-top:8px;">
+                <button class="btn btn-gold" onclick="saveTechnique()" style="flex:1;">保存并推送到 GitHub</button>
+                <button class="btn btn-ghost" onclick="closeTechModal()">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-inner">
+            <div class="footer-brand"><span>岩</span>行记</div>
+            <div class="footer-links">
+                <a href="index.html">首页</a><a href="blog.html">文章</a>
+                <a href="techniques.html">技术分享</a><a href="yanxing.html">岩行中国</a>
+                <a href="about.html">关于</a>
+            </div>
+            <p class="footer-copy">© 2026 岩行记</p>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script>
+    var REPO = 'JFClimbing/blog';
+    var BRANCH = 'gh-pages';
+    var TOKEN = '';
+    var articles = [];
+    var techniques = [];
+    var yxSpots = [];
+    var adminFileData = null;
+    var adminFileName = '';
+
+    // ==================== Token ====================
+    (function initToken() {
+        var t = sessionStorage.getItem('github_token');
+        if (t) { TOKEN = t; showAdmin(); }
+    })();
+
+    function saveToken() {
+        TOKEN = document.getElementById('githubToken').value.trim();
+        if (!TOKEN) { alert('请输入 GitHub Token'); return; }
+        sessionStorage.setItem('github_token', TOKEN);
+        showAdmin();
+    }
+
+    function showAdmin() {
+        document.getElementById('tokenBox').style.display = 'none';
+        document.getElementById('adminMain').style.display = 'block';
+        pullArticles();
+        pullTechniques();
+        pullYanxing();
+        pullPages();
+    }
+
+    // ==================== GitHub API ====================
+    function ghAPI(method, path, data) {
+        var url = 'https://api.github.com/repos/' + REPO + '/contents/' + path;
+        var opts = { method: method, headers: { 'Authorization': 'Bearer ' + TOKEN, 'Accept': 'application/vnd.github+json' } };
+        if (data) opts.body = JSON.stringify(data);
+        return fetch(url, opts).then(function(r) {
+            if (!r.ok) return r.json().then(function(e) { throw new Error(e.message || 'API Error ' + r.status); });
+            return r.json();
+        });
+    }
+
+    function getFile(path) {
+        return ghAPI('GET', path).then(function(r) {
+            return { content: r.content ? decodeURIComponent(escape(atob(r.content.replace(/\s/g, '')))) : '', sha: r.sha };
+        }).catch(function() { return { content: '', sha: '' }; });
+    }
+
+    function putFile(path, content, message, sha) {
+        return ghAPI('PUT', path, {
+            message: message,
+            content: btoa(unescape(encodeURIComponent(content))),
+            branch: BRANCH,
+            sha: sha || undefined
+        });
+    }
+
+    function putBinary(path, base64data, message) {
+        return ghAPI('PUT', path, {
+            message: message,
+            content: base64data.split(',')[1] || base64data,
+            branch: BRANCH
+        });
+    }
+
+    function toast(msg) {
+        var t = document.getElementById('toast');
+        t.textContent = msg; t.style.display = 'block';
+        setTimeout(function() { t.style.display = 'none'; }, 2500);
+    }
+
+    // ==================== Tabs ====================
+    document.getElementById('adminTabs').addEventListener('click', function(e) {
+        if (!e.target.classList.contains('admin-tab')) return;
+        document.querySelectorAll('.admin-tab').forEach(function(b) { b.classList.remove('active'); });
+        document.querySelectorAll('.tab-body').forEach(function(b) { b.classList.remove('active'); });
+        e.target.classList.add('active');
+        document.getElementById('tab-' + e.target.dataset.tab).classList.add('active');
+    });
+
+    // ==================== Articles ====================
+    function pullArticles() {
+        getFile('js/main.js').then(function(r) {
+            var match = r.content.match(/DEFAULT_POSTS\s*=\s*(\[[\s\S]*?\]);/);
+            if (match) { articles = eval('(' + match[1] + ')'); }
+            renderArticles();
+            toast('文章列表已从 GitHub 拉取');
+        }).catch(function(e) { toast('拉取失败: ' + e.message); });
+    }
+
+    function renderArticles() {
+        var html = '';
+        if (!articles.length) {
+            html = '<div class="empty-state"><div class="icon">📝</div><p>暂无文章，点击上方按钮开始写作</p></div>';
+        } else {
+            articles.forEach(function(p, i) {
+                html += '<div class="item-row' + (p.hidden ? ' hidden-item' : '') + '">' +
+                    '<div class="item-info">' +
+                        '<strong>' + p.emoji + ' ' + p.title + '</strong>' +
+                        '<div class="meta">' + p.category + ' | ' + p.date + ' | ' + p.url +
+                            (p.hidden ? '<span class="status-badge badge-hidden">已隐藏</span>' : '<span class="status-badge badge-published">已发布</span>') +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="item-actions">' +
+                        '<button class="btn btn-ghost btn-sm" onclick="editArticle(' + i + ')">编辑</button>' +
+                        '<button class="btn btn-ghost btn-sm" onclick="toggleArticle(' + i + ')">' + (p.hidden ? '显示' : '隐藏') + '</button>' +
+                        '<button class="btn btn-ghost btn-sm" onclick="deleteArticle(' + i + ')" style="color:#e94560;">删除</button>' +
+                    '</div>' +
+                '</div>';
+            });
+        }
+        document.getElementById('articlesList').innerHTML = html;
+    }
+
+    function openArticleEditor(idx) {
+        idx = idx !== undefined ? idx : -1;
+        document.getElementById('artEditIndex').value = idx;
+        document.getElementById('articleModalTitle').textContent = idx >= 0 ? '编辑文章' : '写新文章';
+        document.getElementById('articleModal').style.display = 'flex';
+
+        if (idx >= 0) {
+            var p = articles[idx];
+            document.getElementById('artTitle').value = p.title;
+            document.getElementById('artSubtitle').value = p.subtitle || '';
+            document.getElementById('artCat').value = p.category;
+            document.getElementById('artDate').value = p.date;
+            document.getElementById('artEmoji').value = p.emoji;
+            document.getElementById('artExcerpt').value = p.excerpt;
+            document.getElementById('artSlug').value = (p.url || '').replace('posts/', '').replace('.html', '');
+            document.getElementById('artContent').value = p._content || '';
+        } else {
+            ['artTitle','artSubtitle','artExcerpt','artSlug','artContent'].forEach(function(id) { document.getElementById(id).value = ''; });
+            document.getElementById('artDate').valueAsDate = new Date();
+        }
+    }
+
+    function closeArticleModal() {
+        document.getElementById('articleModal').style.display = 'none';
+    }
+
+    function saveArticle() {
+        var title = document.getElementById('artTitle').value.trim();
+        var excerpt = document.getElementById('artExcerpt').value.trim();
+        var slug = document.getElementById('artSlug').value.trim();
+        var content = document.getElementById('artContent').value.trim();
+        if (!title) { alert('请填写标题'); return; }
+        if (!excerpt) { alert('请填写摘要'); return; }
+        if (!slug) { alert('请填写文件名'); return; }
+
+        var idx = parseInt(document.getElementById('artEditIndex').value);
+        var entry = {
+            title: title,
+            excerpt: excerpt,
+            date: document.getElementById('artDate').value,
+            category: document.getElementById('artCat').value,
+            emoji: document.getElementById('artEmoji').value,
+            bg: 'linear-gradient(135deg, #2c1810, #1a1a2e)',
+            url: 'posts/' + slug + '.html',
+            hidden: false
+        };
+
+        if (idx >= 0) {
+            var old = articles[idx];
+            entry.hidden = old.hidden;
+            entry._content = content;
+            articles[idx] = entry;
+        } else {
+            entry._content = content;
+            articles.unshift(entry);
+        }
+
+        // Generate article HTML
+        if (content) {
+            var d = new Date(entry.date).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+            var articleHTML = '<!DOCTYPE html>\n<html lang="zh-CN">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>' + title + ' | 岩行记</title>\n    <link rel="stylesheet" href="../css/style.css">\n    <link rel="icon" href="data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><text y=\'.9em\' font-size=\'90\'>⛰️</text></svg>">\n</head>\n<body>\n    <nav class="nav">\n        <div class="nav-inner">\n            <a href="../index.html" class="nav-brand"><span>岩</span>行记</a>\n            <div class="nav-links">\n                <a href="../index.html">首页</a><a href="../blog.html">文章</a><a href="../techniques.html">技术分享</a><a href="../yanxing.html">岩行中国</a><a href="../about.html">关于</a>\n            </div>\n            <button class="theme-btn" onclick="toggleTheme()">🌙</button>\n        </div>\n    </nav>\n    <section class="article-head"><div class="container"><div class="post-meta"><span class="post-date">' + d + '</span><span class="post-tag">' + entry.category + '</span></div><h1>' + title + '</h1>' + (document.getElementById('artSubtitle').value ? '<p class="subtitle">' + document.getElementById('artSubtitle').value + '</p>' : '') + '</div></section>\n    <article class="article-body">\n' + mdParse(content) + '\n    </article>\n    <div class="article-nav"><a href="../blog.html">← 返回文章列表</a></div>\n    <footer class="footer"><div class="footer-inner"><div class="footer-brand"><span>岩</span>行记</div><p class="footer-copy">© 2026 岩行记</p></div></footer>\n    <script src="../js/main.js"><\/script>\n</body>\n</html>';
+
+            // Push article HTML
+            putFile(entry.url, articleHTML, '更新文章: ' + title).then(function() {
+                toast('文章 HTML 已推送: ' + entry.url);
+            }).catch(function(e) { alert('推送文章失败: ' + e.message); });
+        }
+
+        // Update articles list in main.js
+        var listToSave = articles.map(function(p) {
+            var o = { title: p.title, excerpt: p.excerpt, date: p.date, category: p.category, emoji: p.emoji, bg: p.bg, url: p.url, hidden: p.hidden };
+            return o;
+        });
+
+        getFile('js/main.js').then(function(r) {
+            var content = r.content;
+            var newContent = content.replace(/DEFAULT_POSTS\s*=\s*\[[\s\S]*?\];/, 'DEFAULT_POSTS = ' + JSON.stringify(listToSave, null, 4) + ';');
+            return putFile('js/main.js', newContent, '更新文章列表: ' + title, r.sha);
+        }).then(function() {
+            toast('文章列表已推送到 GitHub');
+        }).catch(function(e) { alert('推送文章列表失败: ' + e.message); });
+
+        closeArticleModal();
+        renderArticles();
+    }
+
+    function editArticle(i) { openArticleEditor(i); }
+
+    function toggleArticle(i) {
+        articles[i].hidden = !articles[i].hidden;
+        renderArticles();
+        pushArticlesList('切换文章显隐');
+    }
+
+    function deleteArticle(i) {
+        if (!confirm('确定删除「' + articles[i].title + '」？\n注意：只会从列表移除，posts/ 下的 HTML 文件需手动删除。')) return;
+        articles.splice(i, 1);
+        renderArticles();
+        pushArticlesList('删除文章');
+    }
+
+    function pushArticlesList(msg) {
+        var list = articles.map(function(p) {
+            return { title: p.title, excerpt: p.excerpt, date: p.date, category: p.category, emoji: p.emoji, bg: p.bg, url: p.url, hidden: p.hidden };
+        });
+        getFile('js/main.js').then(function(r) {
+            var content = r.content;
+            var newContent = content.replace(/DEFAULT_POSTS\s*=\s*\[[\s\S]*?\];/, 'DEFAULT_POSTS = ' + JSON.stringify(list, null, 4) + ';');
+            return putFile('js/main.js', newContent, msg, r.sha);
+        }).then(function() { toast(msg + ' - 已推送'); })
+          .catch(function(e) { alert('推送失败: ' + e.message); });
+    }
+
+    function mdParse(text) {
+        return text
+            .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+            .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+            .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
+            .replace(/^---$/gm, '<hr>')
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\[image:([^|\]]+)\|?([^\]]*)\]/g, function(m, url, desc) {
+                return '<div style="margin:20px 0;text-align:center;"><img src="' + url + '" alt="' + (desc || '图片') + '" style="max-width:100%;border-radius:8px;">' + (desc ? '<div style="font-size:0.8rem;color:#888;margin-top:6px;">' + desc + '</div>' : '') + '</div>';
+            })
+            .split('\n\n').map(function(p) { p = p.trim(); if (p && p.indexOf('<') !== 0) return '<p>' + p.replace(/\n/g, '<br>') + '</p>'; return p; }).join('\n');
+    }
+
+    // ==================== Techniques ====================
+    function pullTechniques() {
+        getFile('data/techniques.json').then(function(r) {
+            if (r.content) { techniques = JSON.parse(r.content); }
+            renderTechniques();
+            toast('技术资料已从 GitHub 拉取');
+        }).catch(function(e) { toast('拉取失败: ' + e.message); });
+    }
+
+    function renderTechniques() {
+        var html = '';
+        if (!techniques.length) {
+            html = '<div class="empty-state"><div class="icon">📚</div><p>暂无技术资料</p></div>';
+        } else {
+            techniques.forEach(function(t, i) {
+                html += '<div class="item-row">' +
+                    '<div class="item-info">' +
+                        '<strong>' + t.title + '</strong>' +
+                        '<div class="meta">' + t.category + ' | ' + t.date + ' | ' + (t.pdfName || (t.pdfUrl ? '在线PDF' : '无文件')) + '</div>' +
+                    '</div>' +
+                    '<div class="item-actions">' +
+                        '<button class="btn btn-ghost btn-sm" onclick="editTechnique(' + i + ')">编辑</button>' +
+                        '<button class="btn btn-ghost btn-sm" onclick="deleteTechnique(' + i + ')" style="color:#e94560;">删除</button>' +
+                    '</div>' +
+                '</div>';
+            });
+        }
+        document.getElementById('techniquesList').innerHTML = html;
+    }
+
+    function openTechEditor(idx) {
+        idx = idx !== undefined ? idx : -1;
+        document.getElementById('techEditIndex').value = idx;
+        document.getElementById('techModalTitle').textContent = idx >= 0 ? '编辑技术资料' : '添加技术资料';
+        document.getElementById('techModal').style.display = 'flex';
+
+        if (idx >= 0) {
+            var t = techniques[idx];
+            document.getElementById('techTitle2').value = t.title;
+            document.getElementById('techDesc2').value = t.description;
+            document.getElementById('techCat2').value = t.category;
+            document.getElementById('techDate2').value = t.date;
+            document.getElementById('techUrl2').value = t.pdfUrl || '';
+        } else {
+            ['techTitle2','techDesc2','techUrl2'].forEach(function(id) { document.getElementById(id).value = ''; });
+            document.getElementById('techDate2').valueAsDate = new Date();
+            clearAdminFile();
+        }
+    }
+
+    function closeTechModal() { document.getElementById('techModal').style.display = 'none'; }
+
+    function handleAdminFile(event) {
+        var f = event.target.files[0];
+        if (!f) return;
+        if (f.type !== 'application/pdf') { alert('仅支持 PDF'); return; }
+        if (f.size > 2 * 1024 * 1024) { alert('文件超过 2MB'); return; }
+        adminFileName = f.name;
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            adminFileData = e.target.result;
+            document.getElementById('adminFileName').textContent = f.name + ' (' + (f.size / 1024).toFixed(1) + ' KB)';
+            document.getElementById('adminFileSelected').style.display = 'flex';
+            document.getElementById('adminDropZone').style.display = 'none';
+        };
+        reader.readAsDataURL(f);
+    }
+
+    function clearAdminFile() {
+        adminFileData = null; adminFileName = '';
+        document.getElementById('adminPdfInput').value = '';
+        document.getElementById('adminFileSelected').style.display = 'none';
+        document.getElementById('adminDropZone').style.display = 'block';
+    }
+
+    function saveTechnique() {
+        var title = document.getElementById('techTitle2').value.trim();
+        var desc = document.getElementById('techDesc2').value.trim();
+        if (!title) { alert('请填写标题'); return; }
+        if (!desc) { alert('请填写描述'); return; }
+        if (!adminFileData && !document.getElementById('techUrl2').value.trim()) { alert('请上传 PDF 或填写链接'); return; }
+
+        var entry = {
+            id: Date.now(),
+            title: title,
+            description: desc,
+            category: document.getElementById('techCat2').value,
+            date: document.getElementById('techDate2').value,
+            pdfName: adminFileName || '',
+            pdfFile: adminFileName ? 'files/' + adminFileName : '',
+            pdfUrl: document.getElementById('techUrl2').value.trim() || '',
+            author: '岩行记'
+        };
+
+        var idx = parseInt(document.getElementById('techEditIndex').value);
+        if (idx >= 0) {
+            var old = techniques[idx];
+            entry.id = old.id;
+            techniques[idx] = entry;
+        } else {
+            techniques.unshift(entry);
+        }
+
+        // Upload PDF to GitHub
+        if (adminFileData) {
+            putBinary('files/' + adminFileName, adminFileData, '上传技术PDF: ' + adminFileName)
+                .then(function() { toast('PDF 已上传: ' + adminFileName); })
+                .catch(function(e) { alert('PDF 上传失败: ' + e.message); });
+        }
+
+        // Push techniques JSON
+        var jsonData = techniques.map(function(t) {
+            return { id: t.id, title: t.title, description: t.description, category: t.category, date: t.date, pdfName: t.pdfName, pdfFile: t.pdfFile, pdfUrl: t.pdfUrl, author: t.author };
+        });
+        getFile('data/techniques.json').then(function(r) {
+            return putFile('data/techniques.json', JSON.stringify(jsonData, null, 2), '更新技术资料: ' + title, r.sha);
+        }).then(function() { toast('技术资料已推送到 GitHub'); })
+          .catch(function(e) { alert('推送失败: ' + e.message); });
+
+        closeTechModal();
+        renderTechniques();
+    }
+
+    function editTechnique(i) { openTechEditor(i); }
+    function deleteTechnique(i) {
+        if (!confirm('确定删除「' + techniques[i].title + '」？')) return;
+        techniques.splice(i, 1);
+        renderTechniques();
+        var jsonData = techniques.map(function(t) {
+            return { id: t.id, title: t.title, description: t.description, category: t.category, date: t.date, pdfName: t.pdfName, pdfFile: t.pdfFile, pdfUrl: t.pdfUrl, author: t.author };
+        });
+        getFile('data/techniques.json').then(function(r) {
+            return putFile('data/techniques.json', JSON.stringify(jsonData, null, 2), '删除技术资料', r.sha);
+        }).then(function() { toast('已删除并推送'); })
+          .catch(function(e) { alert('推送失败: ' + e.message); });
+    }
+
+    // ==================== Pages ====================
+    function pullPages() {
+        getFile('js/main.js').then(function(r) {
+            var heroDesc = '', heroTitle = '', heroSub = '', aboutIntro = '';
+            var m1 = r.content.match(/hero-desc[^>]*>([^<]+)</);
+            var m2 = r.content.match(/hero-title[^>]*>([^<]+)</);
+            if (!m1) { var ms = r.content.match(/loadSiteConfig/); }
+
+            // Load from localStorage or defaults
+            var cfg = JSON.parse(localStorage.getItem('site_data') || '{}');
+            document.getElementById('heroDesc').value = cfg.heroDesc || '22岁户外爱好者的成长记录。从徒步到攀岩，从山脚到岩壁。';
+            document.getElementById('heroTitle').value = cfg.heroTitle || '岩行记';
+            document.getElementById('heroSub').value = cfg.heroSub || '用脚步丈量山野，用双手攀登绝壁';
+            document.getElementById('aboutIntro').value = cfg.aboutIntro || '';
+            toast('页面配置已加载');
+        }).catch(function() { toast('加载失败'); });
+    }
+
+    function pushPages() {
+        var cfg = {
+            heroDesc: document.getElementById('heroDesc').value,
+            heroTitle: document.getElementById('heroTitle').value,
+            heroSub: document.getElementById('heroSub').value,
+            aboutIntro: document.getElementById('aboutIntro').value
+        };
+        localStorage.setItem('site_data', JSON.stringify(cfg));
+        getFile('js/main.js').then(function(r) {
+            var c = r.content;
+            // Update the loadSiteConfig section to use new values
+            var code = 'localStorage.setItem(\'site_data\', \'' + JSON.stringify(cfg).replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\');';
+            toast('配置已保存到本地，也推送了备份代码。\n在浏览器 Console 执行即可恢复。');
+        }).catch(function(e) { alert('推送失败: ' + e.message); });
+    }
+
+    // ==================== Yanxing ====================
+    function pullYanxing() {
+        try { yxSpots = JSON.parse(localStorage.getItem('yanxing_data') || '[]'); } catch(e) { yxSpots = []; }
+        if (!yxSpots.length) {
+            yxSpots = [
+                { location: '江西', title: '悬念站', desc: '留个悬念，到时候见', status: 'plan', tags: ['2026年9月','悬念'] },
+                { location: '阳朔', title: '广西·阳朔', desc: '国内最著名的攀岩圣地，喀斯特地貌石灰岩壁', status: 'plan', tags: ['石灰岩','V0-V10'] },
+                { location: '格凸河', title: '贵州·格凸河', desc: '天然溶洞攀岩，世界级攀岩胜地', status: 'plan', tags: ['溶洞攀岩','全年可攀'] },
+                { location: '昆明', title: '云南·昆明周边', desc: '四季如春，冬季攀岩好去处', status: 'plan', tags: ['四季可攀','冬季推荐'] }
+            ];
+        }
+        renderYanxing();
+        toast('岩行中国数据已加载');
+    }
+
+    function renderYanxing() {
+        var html = '';
+        if (!yxSpots.length) {
+            html = '<div class="empty-state"><div class="icon">🗺️</div><p>暂无站点</p></div>';
+        } else {
+            yxSpots.forEach(function(s, i) {
+                html += '<div class="item-row">' +
+                    '<div class="item-info">' +
+                        '<strong>第' + (i+1) + '站：' + s.location + ' - ' + s.title + '</strong>' +
+                        '<div class="meta">' + s.desc + '<span class="status-badge badge-' + (s.status === 'done' ? 'published' : 'draft') + '">' + (s.status === 'done' ? '已完成' : '计划中') + '</span></div>' +
+                    '</div>' +
+                    '<div class="item-actions">' +
+                        '<button class="btn btn-ghost btn-sm" onclick="editYxSpot(' + i + ')">编辑</button>' +
+                        '<button class="btn btn-ghost btn-sm" onclick="toggleYxSpot(' + i + ')">' + (s.status === 'done' ? '改计划' : '标完成') + '</button>' +
+                        '<button class="btn btn-ghost btn-sm" onclick="deleteYxSpot(' + i + ')" style="color:#e94560;">删除</button>' +
+                    '</div>' +
+                '</div>';
+            });
+        }
+        document.getElementById('yanxingList').innerHTML = html;
+    }
+
+    function addYxSpot() {
+        yxSpots.push({ location: '新站点', title: '站点描述', desc: '详细描述...', status: 'plan', tags: ['待定'] });
+        saveYanxing();
+        renderYanxing();
+    }
+
+    function editYxSpot(i) {
+        var s = yxSpots[i];
+        var loc = prompt('地点名称：', s.location); if (loc === null) return; s.location = loc;
+        var title = prompt('标题：', s.title); if (title !== null) s.title = title;
+        var desc = prompt('描述：', s.desc || ''); if (desc !== null) s.desc = desc;
+        saveYanxing(); renderYanxing();
+    }
+
+    function toggleYxSpot(i) {
+        yxSpots[i].status = yxSpots[i].status === 'done' ? 'plan' : 'done';
+        saveYanxing(); renderYanxing();
+    }
+
+    function deleteYxSpot(i) {
+        if (confirm('确定删除「' + yxSpots[i].location + '」？')) {
+            yxSpots.splice(i, 1);
+            saveYanxing(); renderYanxing();
+        }
+    }
+
+    function saveYanxing() {
+        localStorage.setItem('yanxing_data', JSON.stringify(yxSpots));
+    }
+
+    // ==================== Drag & drop for admin PDF ====================
+    document.addEventListener('DOMContentLoaded', function() {
+        var dz = document.getElementById('adminDropZone');
+        if (dz) {
+            dz.addEventListener('dragover', function(e) { e.preventDefault(); dz.classList.add('dragover'); });
+            dz.addEventListener('dragleave', function() { dz.classList.remove('dragover'); });
+            dz.addEventListener('drop', function(e) {
+                e.preventDefault(); dz.classList.remove('dragover');
+                if (e.dataTransfer.files.length) {
+                    var f = e.dataTransfer.files[0];
+                    if (f.type === 'application/pdf') {
+                        var reader = new FileReader();
+                        reader.onload = function(ev) {
+                            adminFileData = ev.target.result;
+                            adminFileName = f.name;
+                            document.getElementById('adminFileName').textContent = f.name + ' (' + (f.size / 1024).toFixed(1) + ' KB)';
+                            document.getElementById('adminFileSelected').style.display = 'flex';
+                            document.getElementById('adminDropZone').style.display = 'none';
+                        };
+                        reader.readAsDataURL(f);
+                    }
+                }
+            });
+        }
+
+        // Close modals on overlay click
+        ['articleModal','techModal'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.addEventListener('click', function(e) { if (e.target === this) { this.style.display = 'none'; } });
+        });
+    });
+    </script>
+</body>
+</html>
