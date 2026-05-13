@@ -38,7 +38,7 @@ const DEFAULT_POSTS = [
         "emoji": "🧗",
         "bg": "linear-gradient(135deg, #2c1810, #1a1a2e)",
         "url": "posts/ceshi.html",
-        "hidden": false
+        "hidden": true
     },
     {
         "title": "从徒步到攀岩，我决定去爬墙了",
