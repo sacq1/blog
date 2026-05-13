@@ -287,6 +287,54 @@ img { max-width: 100%; display: block; }
 .mgmt-section h3 { font-size:1.1rem; margin-bottom:16px; }
 .json-editor { width:100%; min-height:200px; font-family:"SF Mono",monospace; font-size:0.8rem; padding:16px; background:var(--bg); border:1px solid var(--border); border-radius:var(--radius); color:var(--text); resize:vertical; }
 
+/* ==================== 技术分享页 ==================== */
+.tech-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:20px; }
+.tech-card {
+    background:var(--bg-card); border:1px solid var(--border);
+    border-radius:var(--radius); padding:24px; transition:var(--trans);
+    display:flex; flex-direction:column;
+}
+.tech-card:hover { border-color:rgba(201,168,76,0.3); transform:translateY(-2px); }
+.tech-card-icon { font-size:2rem; margin-bottom:12px; }
+.tech-card-tag { font-size:0.72rem; color:var(--gold); letter-spacing:1px; margin-bottom:8px; text-transform:uppercase; }
+.tech-card-title { font-size:1.05rem; font-weight:600; margin-bottom:8px; line-height:1.4; }
+.tech-card-desc { font-size:0.85rem; color:var(--text-dim); line-height:1.7; flex:1; margin-bottom:16px; }
+.tech-card-meta { font-size:0.75rem; color:var(--text-muted); margin-bottom:12px; }
+.tech-card-actions { display:flex; gap:8px; flex-wrap:wrap; }
+.btn-download {
+    display:inline-flex; align-items:center; gap:6px;
+    padding:8px 18px; background:var(--gold); color:#0c0c14;
+    border:none; border-radius:6px; font-size:0.82rem; font-weight:500;
+    cursor:pointer; transition:var(--trans); font-family:inherit; text-decoration:none;
+}
+.btn-download:hover { background:#d4b35a; transform:translateY(-1px); }
+.btn-download.disabled { background:var(--bg-hover); color:var(--text-muted); cursor:not-allowed; pointer-events:none; }
+.btn-online { display:inline-flex; align-items:center; gap:6px; padding:8px 18px; background:transparent; color:var(--gold); border:1px solid var(--gold); border-radius:6px; font-size:0.82rem; cursor:pointer; transition:var(--trans); font-family:inherit; }
+.btn-online:hover { background:var(--gold-dim); }
+
+.tech-upload-section { margin-top:60px; padding-top:40px; border-top:1px solid var(--border); }
+.tech-upload-section h2 { margin-bottom:8px; }
+.tech-upload-section > p { color:var(--text-dim); margin-bottom:24px; font-size:0.9rem; }
+.file-upload-box {
+    border:2px dashed var(--border); border-radius:var(--radius);
+    padding:40px; text-align:center; cursor:pointer; transition:var(--trans);
+    margin-bottom:16px;
+}
+.file-upload-box:hover, .file-upload-box.dragover { border-color:var(--gold); background:var(--gold-dim); }
+.file-upload-box .upload-icon { font-size:2.5rem; margin-bottom:12px; }
+.file-upload-box .upload-text { color:var(--text-dim); font-size:0.9rem; }
+.file-upload-box .upload-hint { color:var(--text-muted); font-size:0.75rem; margin-top:6px; }
+.file-upload-box input[type="file"] { display:none; }
+.file-selected { background:var(--gold-dim); border-color:var(--gold); padding:12px 20px; border-radius:var(--radius); display:none; align-items:center; justify-content:space-between; margin-bottom:16px; }
+.file-selected .file-name { font-size:0.85rem; color:var(--gold); }
+.file-selected .file-remove { background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:1.1rem; }
+
+.tech-empty { text-align:center; padding:60px 24px; color:var(--text-muted); }
+.tech-empty .empty-icon { font-size:3rem; margin-bottom:16px; }
+.tech-empty p { font-size:0.9rem; }
+
+.tech-categories { display:flex; gap:8px; margin-bottom:32px; flex-wrap:wrap; }
+
 /* ==================== 响应式 ==================== */
 @media (max-width:768px) {
     .nav-links { display:none; position:absolute; top:100%; left:0; right:0; background:var(--bg-card); flex-direction:column; padding:20px 24px; gap:14px; border-bottom:1px solid var(--border); }

@@ -14,6 +14,7 @@
             <div class="nav-links">
                 <a href="index.html">首页</a>
                 <a href="blog.html">文章</a>
+                <a href="techniques.html">技术分享</a>
                 <a href="yanxing.html">岩行中国</a>
                 <a href="about.html">关于</a>
             </div>
@@ -43,6 +44,7 @@
                     <button class="filter-btn active" onclick="switchTab('posts')">文章管理</button>
                     <button class="filter-btn" onclick="switchTab('pages')">页面内容</button>
                     <button class="filter-btn" onclick="switchTab('yanxing')">岩行中国</button>
+                    <button class="filter-btn" onclick="switchTab('techniques')">技术分享</button>
                     <button class="filter-btn" onclick="switchTab('export')">发布更新</button>
                 </div>
 
@@ -89,6 +91,15 @@
                     <div id="yxSpotsList"></div>
                 </div>
 
+                <!-- 技术分享管理 -->
+                <div id="tab-techniques" class="tab-content" style="display:none">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+                        <h2>技术分享管理</h2>
+                        <button class="btn btn-gold btn-sm" onclick="addTechnique()">+ 添加技术资料</button>
+                    </div>
+                    <div id="techniquesList"></div>
+                </div>
+
                 <!-- 发布更新 -->
                 <div id="tab-export" class="tab-content" style="display:none">
                     <h2>发布更新</h2>
@@ -103,6 +114,9 @@
                                 </label>
                                 <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
                                     <input type="checkbox" id="exportPages"> <span>页面内容 (首页/关于/岩行中国)</span>
+                                </label>
+                                <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                                    <input type="checkbox" id="exportTechniques"> <span>技术分享 (techniques_data)</span>
                                 </label>
                             </div>
                         </div>
@@ -259,6 +273,85 @@
             }
         }
 
+        // ==================== 技术分享管理 ====================
+        function renderTechniquesList() {
+            var techs = [];
+            try {
+                var d = localStorage.getItem('techniques_data');
+                if (d) techs = JSON.parse(d);
+            } catch(e) { techs = []; }
+
+            var html = '<div style="display:flex;flex-direction:column;gap:16px">';
+            if (!techs.length) {
+                html += '<p style="color:var(--text-muted);text-align:center;padding:40px;">暂无技术资料，去<a href="techniques.html" style="color:var(--gold);">技术分享页</a>上传</p>';
+            } else {
+                techs.forEach(function(t, i) {
+                    var d = new Date(t.date).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+                    var hasPdf = t.pdfData || t.pdfUrl;
+                    html += '<div class="form-card" style="padding:20px">' +
+                        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">' +
+                            '<div>' +
+                                '<strong style="display:block;margin-bottom:4px">' + t.title + '</strong>' +
+                                '<span style="font-size:0.8rem;color:var(--text-muted)">' + t.category + ' | ' + d + ' | ' + (hasPdf ? (t.pdfName || '有PDF') : '无文件') + '</span>' +
+                            '</div>' +
+                            '<div style="display:flex;gap:8px">' +
+                                '<button class="btn btn-ghost btn-sm" onclick="editTechnique(' + i + ')">编辑</button>' +
+                                '<button class="btn btn-ghost btn-sm" onclick="deleteTechnique(' + i + ')" style="color:#e94560">删除</button>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>';
+                });
+            }
+            html += '</div>';
+            document.getElementById('techniquesList').innerHTML = html;
+        }
+
+        function addTechnique() {
+            var techs = [];
+            try { var d = localStorage.getItem('techniques_data'); if (d) techs = JSON.parse(d); } catch(e) {}
+            techs.unshift({
+                id: Date.now(),
+                title: '新技术资料',
+                description: '描述说明...',
+                category: '绳索技术',
+                date: new Date().toISOString().split('T')[0],
+                pdfName: '',
+                pdfData: '',
+                pdfUrl: '',
+                author: '岩行记'
+            });
+            localStorage.setItem('techniques_data', JSON.stringify(techs));
+            renderTechniquesList();
+            alert('新技术资料已添加！请编辑完善信息，然后到技术分享页面上传 PDF 文件。');
+        }
+
+        function editTechnique(i) {
+            var techs = [];
+            try { var d = localStorage.getItem('techniques_data'); if (d) techs = JSON.parse(d); } catch(e) {}
+            var t = techs[i];
+            var newTitle = prompt('资料标题：', t.title);
+            if (newTitle === null) return;
+            t.title = newTitle;
+            var newDesc = prompt('描述说明：', t.description);
+            if (newDesc !== null) t.description = newDesc;
+            var newCat = prompt('分类（绳索技术/保护技术/攀岩技巧/装备知识/其他）：', t.category);
+            if (newCat) t.category = newCat;
+            var newDate = prompt('日期（YYYY-MM-DD）：', t.date);
+            if (newDate) t.date = newDate;
+            localStorage.setItem('techniques_data', JSON.stringify(techs));
+            renderTechniquesList();
+        }
+
+        function deleteTechnique(i) {
+            var techs = [];
+            try { var d = localStorage.getItem('techniques_data'); if (d) techs = JSON.parse(d); } catch(e) {}
+            if (confirm('确定删除「' + techs[i].title + '」？')) {
+                techs.splice(i, 1);
+                localStorage.setItem('techniques_data', JSON.stringify(techs));
+                renderTechniquesList();
+            }
+        }
+
         // ==================== 岩行中国管理 ====================
         function renderYxSpots() {
             var html = '<div style="display:flex;flex-direction:column;gap:16px">';
@@ -327,6 +420,7 @@
             var codes = [];
             var exportPosts = document.getElementById('exportPosts').checked;
             var exportPages = document.getElementById('exportPages').checked;
+            var exportTechniques = document.getElementById('exportTechniques').checked;
 
             if (exportPosts) {
                 codes.push('// ==================== 文章数据（替换 main.js 中的 POSTS 数组）====================\n' +
@@ -344,6 +438,13 @@
                         heroSub: document.getElementById('heroSub').value,
                         aboutIntro: document.getElementById('aboutIntro').value
                     }, null, 2) + ';');
+            }
+
+            if (exportTechniques) {
+                var techs = localStorage.getItem('techniques_data') || '[]';
+                codes.push('// ==================== 技术分享数据 ====================\n' +
+                    '// 将此代码粘贴到浏览器 Console 中执行，即可恢复技术分享数据\n' +
+                    'localStorage.setItem(\'techniques_data\', \'' + techs.replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\');');
             }
 
             document.getElementById('exportCode').textContent = codes.join('\n\n// ================\n\n');
@@ -365,6 +466,7 @@
             loadSiteData();
             renderPostsList();
             renderYxSpots();
+            renderTechniquesList();
             document.getElementById('heroDesc').value = siteData.heroDesc;
             document.getElementById('heroTitle').value = siteData.heroTitle;
             document.getElementById('heroSub').value = siteData.heroSub;

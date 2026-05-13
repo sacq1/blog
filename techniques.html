@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>技术分享 | 岩行记</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛰️</text></svg>">
+    <meta http-equiv="Cache-Control" content="no-cache">
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-inner">
+            <a href="index.html" class="nav-brand"><span>岩</span>行记</a>
+            <div class="nav-links" id="navLinks">
+                <a href="index.html">首页</a>
+                <a href="blog.html">文章</a>
+                <a href="techniques.html" class="active">技术分享</a>
+                <a href="yanxing.html">岩行中国</a>
+                <a href="about.html">关于</a>
+            </div>
+            <button class="theme-btn" onclick="toggleTheme()" title="切换主题">🌙</button>
+            <button class="nav-toggle" onclick="document.getElementById('navLinks').classList.toggle('show')">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <section class="page-head">
+        <div class="container">
+            <h1>攀岩技术分享</h1>
+            <p>绳索技术、保护技术、攀岩技巧、装备知识 —— 用 PDF 沉淀知识，自由下载学习</p>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="tech-categories" id="techCategories">
+                <button class="filter-btn active" data-cat="all">全部</button>
+                <button class="filter-btn" data-cat="绳索技术">绳索技术</button>
+                <button class="filter-btn" data-cat="保护技术">保护技术</button>
+                <button class="filter-btn" data-cat="攀岩技巧">攀岩技巧</button>
+                <button class="filter-btn" data-cat="装备知识">装备知识</button>
+                <button class="filter-btn" data-cat="其他">其他</button>
+            </div>
+
+            <div class="tech-grid" id="techGrid"></div>
+            <div class="tech-empty" id="techEmpty" style="display:none;">
+                <div class="empty-icon">📚</div>
+                <p>暂无技术分享内容</p>
+                <p style="font-size:0.8rem;">博主正在整理攀岩技术资料，敬请期待</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="uploadSection" style="display:none;">
+        <div class="container">
+            <div class="tech-upload-section">
+                <h2>上传新技术资料</h2>
+                <p>支持上传 PDF 文件或添加在线链接。PDF 将存储在浏览器本地，建议单个文件不超过 2MB。</p>
+
+                <div class="form-card">
+                    <div class="form-group">
+                        <label class="form-label">资料标题</label>
+                        <input type="text" class="form-input" id="techTitle" placeholder="例如：攀岩绳结大全">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">描述说明</label>
+                        <textarea class="form-textarea" id="techDesc" placeholder="简要描述这份资料的内容..." style="min-height:80px;"></textarea>
+                    </div>
+                    <div class="form-inline">
+                        <div class="form-group" style="flex:1;">
+                            <label class="form-label">分类</label>
+                            <select class="form-select" id="techCat">
+                                <option>绳索技术</option><option>保护技术</option>
+                                <option>攀岩技巧</option><option>装备知识</option><option>其他</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="flex:1;">
+                            <label class="form-label">日期</label>
+                            <input type="date" class="form-input" id="techDate">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">PDF 文件（可选，二选一）</label>
+                        <div class="file-upload-box" id="fileDropZone" onclick="document.getElementById('pdfFileInput').click()">
+                            <div class="upload-icon">📄</div>
+                            <div class="upload-text">点击此处选择 PDF 文件，或将文件拖拽到这里</div>
+                            <div class="upload-hint">单个文件建议不超过 2MB</div>
+                            <input type="file" id="pdfFileInput" accept=".pdf" onchange="handleFileSelect(event)">
+                        </div>
+                        <div class="file-selected" id="fileSelected">
+                            <span class="file-name" id="selectedFileName"></span>
+                            <button class="file-remove" onclick="clearFile()" title="移除文件">✕</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">或填写在线链接（可选）</label>
+                        <input type="text" class="form-input" id="techUrl" placeholder="https://... 如果 PDF 已托管在其他地方，直接填写 URL">
+                    </div>
+
+                    <button class="btn btn-gold" onclick="uploadTechnique()">发布技术资料</button>
+                    <p class="form-hint" style="margin-top:8px;">上传后即时生效，所有访客均可下载。仅博主可在此上传。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PDF 预览模态框 -->
+    <div id="pdfModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:10001;background:rgba(0,0,0,0.85);" onclick="if(event.target===this)closePdfModal()">
+        <div style="position:absolute;top:16px;right:24px;z-index:10;">
+            <button onclick="closePdfModal()" style="background:none;border:none;color:#fff;font-size:1.8rem;cursor:pointer;padding:8px;">✕</button>
+        </div>
+        <iframe id="pdfFrame" style="width:100%;height:100%;border:none;" allowfullscreen></iframe>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-inner">
+            <div class="footer-brand"><span>岩</span>行记</div>
+            <div class="footer-links">
+                <a href="index.html">首页</a>
+                <a href="blog.html">文章</a>
+                <a href="techniques.html">技术分享</a>
+                <a href="yanxing.html">岩行中国</a>
+                <a href="about.html">关于</a>
+            </div>
+            <p class="footer-copy">© 2026 岩行记</p>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script src="js/admin.js"></script>
+    <script>
+        var TECH_PASS = 'LBS20040816';
+        var isAuthor = sessionStorage.getItem('techniques_auth') === '1';
+
+        // ==================== 数据管理 ====================
+        var TECHNIQUES = [];
+        function loadTechniques() {
+            try {
+                var d = localStorage.getItem('techniques_data');
+                if (d) TECHNIQUES = JSON.parse(d);
+            } catch(e) { TECHNIQUES = []; }
+            if (!TECHNIQUES.length) TECHNIQUES = [];
+        }
+
+        function saveTechniques() {
+            localStorage.setItem('techniques_data', JSON.stringify(TECHNIQUES));
+        }
+
+        // ==================== 渲染技术卡片 ====================
+        var iconMap = { '绳索技术': '🪢', '保护技术': '🛡️', '攀岩技巧': '🧗', '装备知识': '🎒', '其他': '📖' };
+        var currentFilter = 'all';
+
+        function renderTechniques(filter) {
+            filter = filter || currentFilter;
+            currentFilter = filter;
+            var container = document.getElementById('techGrid');
+            var empty = document.getElementById('techEmpty');
+
+            var list = filter === 'all' ? TECHNIQUES : TECHNIQUES.filter(function(t) { return t.category === filter; });
+
+            if (!list.length) {
+                container.innerHTML = '';
+                empty.style.display = 'block';
+                return;
+            }
+            empty.style.display = 'none';
+
+            container.innerHTML = list.map(function(t, i) {
+                var d = new Date(t.date).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+                var icon = iconMap[t.category] || '📖';
+                var hasPdf = !!(t.pdfData || t.pdfUrl);
+                var dlBtn = '';
+                if (t.pdfData) {
+                    dlBtn = '<button class="btn-download" onclick="downloadPdf(' + i + ')">📥 下载 PDF</button>';
+                } else if (t.pdfUrl) {
+                    dlBtn = '<a href="' + t.pdfUrl + '" target="_blank" class="btn-download">📥 下载 PDF</a>' +
+                            '<button class="btn-online" onclick="previewPdfUrl(\'' + t.pdfUrl + '\')">👁 在线预览</button>';
+                } else {
+                    dlBtn = '<span class="btn-download disabled">暂无文件</span>';
+                }
+
+                var delBtn = '';
+                if (isAuthor) {
+                    delBtn = '<button class="btn btn-ghost btn-sm" onclick="deleteTechnique(' + i + ')" style="color:#e94560;margin-top:8px;">删除</button>';
+                }
+
+                return '<article class="tech-card">' +
+                    '<div class="tech-card-icon">' + icon + '</div>' +
+                    '<div class="tech-card-tag">' + t.category + '</div>' +
+                    '<h3 class="tech-card-title">' + t.title + '</h3>' +
+                    '<p class="tech-card-desc">' + t.description + '</p>' +
+                    '<div class="tech-card-meta">' + d + (t.pdfName ? ' · ' + t.pdfName : '') + '</div>' +
+                    '<div class="tech-card-actions">' + dlBtn + '</div>' +
+                    delBtn +
+                '</article>';
+            }).join('');
+        }
+
+        // ==================== PDF 下载 ====================
+        function downloadPdf(index) {
+            var t = TECHNIQUES[index];
+            if (!t || !t.pdfData) return;
+            var byteChars = atob(t.pdfData.split(',')[1]);
+            var byteNums = new Array(byteChars.length);
+            for (var i = 0; i < byteChars.length; i++) byteNums[i] = byteChars.charCodeAt(i);
+            var byteArr = new Uint8Array(byteNums);
+            var blob = new Blob([byteArr], { type: 'application/pdf' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = t.pdfName || 'technique.pdf';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // ==================== PDF 预览 ====================
+        function previewPdfUrl(url) {
+            document.getElementById('pdfFrame').src = url;
+            document.getElementById('pdfModal').style.display = 'block';
+        }
+
+        function previewPdfData(index) {
+            var t = TECHNIQUES[index];
+            if (!t || !t.pdfData) return;
+            document.getElementById('pdfFrame').src = t.pdfData;
+            document.getElementById('pdfModal').style.display = 'block';
+        }
+
+        function closePdfModal() {
+            document.getElementById('pdfModal').style.display = 'none';
+            document.getElementById('pdfFrame').src = '';
+        }
+
+        // ==================== 文件上传处理 ====================
+        var selectedFileData = null;
+        var selectedFileName = '';
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var dz = document.getElementById('fileDropZone');
+            if (dz) {
+                dz.addEventListener('dragover', function(e) { e.preventDefault(); dz.classList.add('dragover'); });
+                dz.addEventListener('dragleave', function() { dz.classList.remove('dragover'); });
+                dz.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    dz.classList.remove('dragover');
+                    if (e.dataTransfer.files.length) processFile(e.dataTransfer.files[0]);
+                });
+            }
+        });
+
+        function handleFileSelect(event) {
+            var f = event.target.files[0];
+            if (f) processFile(f);
+        }
+
+        function processFile(file) {
+            if (file.type !== 'application/pdf') { alert('仅支持 PDF 文件'); return; }
+            if (file.size > 3 * 1024 * 1024) { alert('文件超过 3MB，建议压缩后再上传'); return; }
+            selectedFileName = file.name;
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                selectedFileData = e.target.result;
+                document.getElementById('selectedFileName').textContent = file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+                document.getElementById('fileSelected').style.display = 'flex';
+                document.getElementById('fileDropZone').style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function clearFile() {
+            selectedFileData = null;
+            selectedFileName = '';
+            document.getElementById('pdfFileInput').value = '';
+            document.getElementById('fileSelected').style.display = 'none';
+            document.getElementById('fileDropZone').style.display = 'block';
+        }
+
+        // ==================== 发布技术资料 ====================
+        function uploadTechnique() {
+            var title = document.getElementById('techTitle').value.trim();
+            var desc = document.getElementById('techDesc').value.trim();
+            var cat = document.getElementById('techCat').value;
+            var date = document.getElementById('techDate').value;
+            var url = document.getElementById('techUrl').value.trim();
+
+            if (!title) { alert('请填写资料标题'); return; }
+            if (!desc) { alert('请填写描述说明'); return; }
+            if (!selectedFileData && !url) { alert('请上传 PDF 文件或填写在线链接'); return; }
+            if (!date) { alert('请选择日期'); return; }
+
+            var entry = {
+                id: Date.now(),
+                title: title,
+                description: desc,
+                category: cat,
+                date: date,
+                pdfName: selectedFileName || '',
+                pdfData: selectedFileData || '',
+                pdfUrl: url || '',
+                author: '岩行记'
+            };
+
+            TECHNIQUES.unshift(entry);
+            saveTechniques();
+            resetUploadForm();
+            renderTechniques();
+            alert('技术资料发布成功！');
+        }
+
+        function resetUploadForm() {
+            document.getElementById('techTitle').value = '';
+            document.getElementById('techDesc').value = '';
+            document.getElementById('techUrl').value = '';
+            document.getElementById('techDate').valueAsDate = new Date();
+            clearFile();
+        }
+
+        function deleteTechnique(index) {
+            if (!confirm('确定删除「' + TECHNIQUES[index].title + '」？')) return;
+            TECHNIQUES.splice(index, 1);
+            saveTechniques();
+            renderTechniques();
+        }
+
+        // ==================== 分类筛选 ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('techCategories').addEventListener('click', function(e) {
+                if (!e.target.classList.contains('filter-btn')) return;
+                document.querySelectorAll('#techCategories .filter-btn').forEach(function(b) { b.classList.remove('active'); });
+                e.target.classList.add('active');
+                renderTechniques(e.target.dataset.cat);
+            });
+
+            document.getElementById('techDate').valueAsDate = new Date();
+        });
+
+        // ==================== 作者登录 ====================
+        if (sessionStorage.getItem('techniques_auth') === '1') {
+            isAuthor = true;
+            document.getElementById('uploadSection').style.display = 'block';
+        }
+
+        function showAuthorLogin() {
+            var pass = prompt('博主验证：请输入密码');
+            if (pass === TECH_PASS) {
+                sessionStorage.setItem('techniques_auth', '1');
+                isAuthor = true;
+                document.getElementById('uploadSection').style.display = 'block';
+                renderTechniques();
+                alert('验证成功！现在可以上传技术资料了。');
+            } else if (pass !== null) {
+                alert('密码错误');
+            }
+        }
+
+        // ==================== 初始化 ====================
+        loadTechniques();
+        renderTechniques();
+
+        // 在页面底部添加博主上传入口
+        if (!isAuthor) {
+            var entry = '' +
+            '<div style="text-align:center;padding:40px 0;">' +
+                '<p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:12px;">博主专用</p>' +
+                '<button class="btn btn-ghost btn-sm" onclick="showAuthorLogin()">📤 上传技术资料</button>' +
+            '</div>';
+            document.querySelector('.section .container').insertAdjacentHTML('beforeend', entry);
+        }
+
+        // 键盘快捷键关闭模态框
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closePdfModal();
+        });
+    </script>
+</body>
+</html>

@@ -3,6 +3,7 @@ var ADMIN_PASS = 'LBS20040816';
 // 判断当前页面类型
 var isEditorPage = window.location.pathname.indexOf('editor.html') !== -1;
 var isSiteEditorPage = window.location.pathname.indexOf('site-editor.html') !== -1;
+var isTechniquesPage = window.location.pathname.indexOf('techniques.html') !== -1;
 
 // ==================== 应用本地编辑（普通用户可见） ====================
 (function applyEdits() {
@@ -26,13 +27,13 @@ var isSiteEditorPage = window.location.pathname.indexOf('site-editor.html') !== 
     var isAdmin = sessionStorage.getItem('admin_auth') === '1';
 
     // 非管理页面：只显示登录入口
-    if (!isAdmin && !isEditorPage && !isSiteEditorPage) {
+    if (!isAdmin && !isEditorPage && !isSiteEditorPage && !isTechniquesPage) {
         createLoginButton();
         return;
     }
 
     // 已登录的管理页面：启用编辑模式
-    if (isAdmin && !isEditorPage && !isSiteEditorPage) {
+    if (isAdmin && !isEditorPage && !isSiteEditorPage && !isTechniquesPage) {
         enableEditMode();
         return;
     }
