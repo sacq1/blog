@@ -189,6 +189,40 @@ img { max-width: 100%; display: block; }
 .stat-num { display:block; font-size:1.4rem; font-weight:700; color:var(--gold); margin-bottom:6px; }
 .stat-label { font-size:0.7rem; color:var(--text-muted); letter-spacing:1px; }
 
+/* ==================== 徒步页面 ==================== */
+.hiking-hero {
+    padding: 140px 0 80px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+.hiking-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 700px;
+    height: 700px;
+    background: radial-gradient(ellipse, rgba(76,150,100,0.12) 0%, transparent 70%);
+    pointer-events: none;
+}
+.hiking-hero h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 12px;
+}
+.hiking-hero h1 span { color: var(--gold); }
+.hiking-hero p { color: var(--text-dim); font-size: 1.05rem; }
+.hiking-empty {
+    text-align: center;
+    padding: 60px 24px;
+    color: var(--text-muted);
+}
+.hiking-empty .empty-icon { font-size: 3rem; margin-bottom: 16px; }
+.hiking-empty p { font-size: 0.9rem; }
+
 /* ==================== 页脚 ==================== */
 .footer { padding:40px 0; border-top:1px solid var(--border); text-align:center; }
 .footer-inner { max-width:1000px; margin:0 auto; padding:0 24px; }

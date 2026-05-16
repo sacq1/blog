@@ -40,6 +40,7 @@
                 <a href="index.html">首页</a>
                 <a href="blog.html">文章</a>
                 <a href="techniques.html">技术分享</a>
+                <a href="hiking.html">徒步</a>
                 <a href="yanxing.html">岩行中国</a>
                 <a href="about.html">关于</a>
             </div>
@@ -165,7 +166,7 @@
             <div class="form-group"><label class="form-label">文章标题 *</label><input type="text" class="form-input" id="artTitle"></div>
             <div class="form-group"><label class="form-label">副标题</label><input type="text" class="form-input" id="artSubtitle"></div>
             <div class="form-inline">
-                <div class="form-group" style="flex:1;"><label class="form-label">分类</label><select class="form-select" id="artCat"><option>攀岩</option><option>徒步</option><option>攻略</option><option>生活</option><option>绳索技术</option><option>装备</option></select></div>
+                <div class="form-group" style="flex:1;"><label class="form-label">分类</label><select class="form-select" id="artCat"><option>攀岩</option><option>徒步</option><option>徒步攻略</option><option>经验分享</option><option>装备推荐</option><option>路线推荐</option><option>攻略</option><option>生活</option><option>绳索技术</option><option>装备</option></select></div>
                 <div class="form-group" style="flex:1;"><label class="form-label">日期</label><input type="date" class="form-input" id="artDate"></div>
                 <div class="form-group" style="flex:1;"><label class="form-label">Emoji</label><select class="form-select" id="artEmoji"><option>🧗</option><option>🏔️</option><option>🪢</option><option>🥾</option><option>🗺️</option><option>📷</option><option>⛰️</option></select></div>
             </div>
@@ -241,7 +242,8 @@
             <div class="footer-brand"><span>岩</span>行记</div>
             <div class="footer-links">
                 <a href="index.html">首页</a><a href="blog.html">文章</a>
-                <a href="techniques.html">技术分享</a><a href="yanxing.html">岩行中国</a>
+                <a href="techniques.html">技术分享</a><a href="hiking.html">徒步</a>
+                <a href="yanxing.html">岩行中国</a>
                 <a href="about.html">关于</a>
             </div>
             <p class="footer-copy">© 2026 岩行记</p>
@@ -424,7 +426,7 @@
         // Generate article HTML
         if (content) {
             var d = new Date(entry.date).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
-            var articleHTML = '<!DOCTYPE html>\n<html lang="zh-CN">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>' + title + ' | 岩行记</title>\n    <link rel="stylesheet" href="../css/style.css">\n    <link rel="icon" href="data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><text y=\'.9em\' font-size=\'90\'>⛰️</text></svg>">\n</head>\n<body>\n    <nav class="nav">\n        <div class="nav-inner">\n            <a href="../index.html" class="nav-brand"><span>岩</span>行记</a>\n            <div class="nav-links">\n                <a href="../index.html">首页</a><a href="../blog.html">文章</a><a href="../techniques.html">技术分享</a><a href="../yanxing.html">岩行中国</a><a href="../about.html">关于</a>\n            </div>\n            <button class="theme-btn" onclick="toggleTheme()">🌙</button>\n        </div>\n    </nav>\n    <section class="article-head"><div class="container"><div class="post-meta"><span class="post-date">' + d + '</span><span class="post-tag">' + entry.category + '</span></div><h1>' + title + '</h1>' + (document.getElementById('artSubtitle').value ? '<p class="subtitle">' + document.getElementById('artSubtitle').value + '</p>' : '') + '</div></section>\n    <article class="article-body">\n' + mdParse(content) + '\n    </article>\n    <div class="article-nav"><a href="../blog.html">← 返回文章列表</a></div>\n    <footer class="footer"><div class="footer-inner"><div class="footer-brand"><span>岩</span>行记</div><p class="footer-copy">© 2026 岩行记</p></div></footer>\n    <script src="../js/main.js"><\/script>\n</body>\n</html>';
+            var articleHTML = '<!DOCTYPE html>\n<html lang="zh-CN">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>' + title + ' | 岩行记</title>\n    <link rel="stylesheet" href="../css/style.css">\n    <link rel="icon" href="data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><text y=\'.9em\' font-size=\'90\'>⛰️</text></svg>">\n</head>\n<body>\n    <nav class="nav">\n        <div class="nav-inner">\n            <a href="../index.html" class="nav-brand"><span>岩</span>行记</a>\n            <div class="nav-links">\n                <a href="../index.html">首页</a><a href="../blog.html">文章</a><a href="../techniques.html">技术分享</a><a href="../hiking.html">徒步</a><a href="../yanxing.html">岩行中国</a><a href="../about.html">关于</a>\n            </div>\n            <button class="theme-btn" onclick="toggleTheme()">🌙</button>\n        </div>\n    </nav>\n    <section class="article-head"><div class="container"><div class="post-meta"><span class="post-date">' + d + '</span><span class="post-tag">' + entry.category + '</span></div><h1>' + title + '</h1>' + (document.getElementById('artSubtitle').value ? '<p class="subtitle">' + document.getElementById('artSubtitle').value + '</p>' : '') + '</div></section>\n    <article class="article-body">\n' + mdParse(content) + '\n    </article>\n    <div class="article-nav"><a href="../blog.html">← 返回文章列表</a></div>\n    <footer class="footer"><div class="footer-inner"><div class="footer-brand"><span>岩</span>行记</div><p class="footer-copy">© 2026 岩行记</p></div></footer>\n    <script src="../js/main.js"><\/script>\n</body>\n</html>';
 
             // Push article HTML
             putFile(entry.url, articleHTML, '更新文章: ' + title).then(function() {

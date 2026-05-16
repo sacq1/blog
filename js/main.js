@@ -31,44 +31,55 @@ function updateThemeIcon() {
 // ==================== 文章数据 ====================
 const DEFAULT_POSTS = [
     {
-        "title": "1",
-        "excerpt": "1",
-        "date": "2026-05-13",
-        "category": "攀岩",
-        "emoji": "🧗",
-        "bg": "linear-gradient(135deg, #2c1810, #1a1a2e)",
-        "url": "posts/ceshi.html",
-        "hidden": true
-    },
     {
         "title": "从徒步到攀岩，我决定去爬墙了",
         "excerpt": "徒步走了3年，走过梅里雪山的冰川，走过齐云山的云海。直到有一天，我站在一面岩壁下面……",
         "date": "2026-05-10",
-        "category": "攀岩",
+        "category": "经验分享",
         "emoji": "🧗",
         "bg": "linear-gradient(135deg, #2c1810, #1a1a2e)",
         "url": "posts/hiking-to-climbing.html",
-        "hidden": true
+        "hidden": false
     },
     {
-        "title": "梅里雪山保姆级攻略",
-        "excerpt": "从交通到住宿，从路线到装备，一篇讲清楚梅里雪山怎么去、怎么看、花多少钱。",
-        "date": "2026-04-21",
-        "category": "攻略",
+        "title": "徒步入门：第一次徒步需要准备什么？",
+        "excerpt": "从鞋子到背包，从食物到导航，手把手教你准备第一次徒步。不需要花大钱，安全出行最重要。",
+        "date": "2026-05-15",
+        "category": "徒步攻略",
+        "emoji": "🥾",
+        "bg": "linear-gradient(135deg, #1a3a2a, #0f3422)",
+        "url": "posts/hiking-guide-first-time.html",
+        "hidden": false
+    },
+    {
+        "title": "我的徒步三年：从新手到独行侠",
+        "excerpt": "3年时间，走了不下20条路线。梅里雪山雨崩村、齐云山云海、南太行绝壁……分享我走过的路和踩过的坑。",
+        "date": "2026-05-08",
+        "category": "经验分享",
+        "emoji": "🏕️",
+        "bg": "linear-gradient(135deg, #2a3a1a, #3a4a2a)",
+        "url": "posts/hiking-experience-3years.html",
+        "hidden": false
+    },
+    {
+        "title": "徒步装备清单：这些钱不能省",
+        "excerpt": "徒步鞋、登山杖、冲锋衣……哪些装备值得投资，哪些可以省？3年徒步经验总结的装备红黑榜。",
+        "date": "2026-04-28",
+        "category": "装备推荐",
+        "emoji": "🎒",
+        "bg": "linear-gradient(135deg, #1a2a3a, #2a3a4a)",
+        "url": "posts/hiking-gear-guide.html",
+        "hidden": false
+    },
+    {
+        "title": "雨崩村徒步路线详解",
+        "excerpt": "梅里雪山脚下的世外桃源——雨崩村。详细路线、交通、住宿、花费，一篇讲清楚。",
+        "date": "2026-04-18",
+        "category": "路线推荐",
         "emoji": "🏔️",
-        "bg": "linear-gradient(135deg, #1a2a3a, #0f3460)",
-        "url": "posts/meili-snow-mountain.html",
-        "hidden": true
-    },
-    {
-        "title": "攀岩绳结入门：这5个绳结必须会",
-        "excerpt": "八字结、布林结、双套结、意大利半扣、抓结。掌握这5个，户外攀岩够用了。",
-        "date": "2026-04-15",
-        "category": "绳索技术",
-        "emoji": "🪢",
-        "bg": "linear-gradient(135deg, #3a1a1a, #5c1a1a)",
-        "url": "posts/essential-knots.html",
-        "hidden": true
+        "bg": "linear-gradient(135deg, #3a2a1a, #4a3a2a)",
+        "url": "posts/hiking-yubeng-route.html",
+        "hidden": false
     }
 ];
 

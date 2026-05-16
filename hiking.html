@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>徒步 | 岩行记</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛰️</text></svg>">
+    <meta http-equiv="Cache-Control" content="no-cache">
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-inner">
+            <a href="index.html" class="nav-brand"><span>岩</span>行记</a>
+            <div class="nav-links" id="navLinks">
+                <a href="index.html">首页</a>
+                <a href="blog.html">文章</a>
+                <a href="techniques.html">技术分享</a>
+                <a href="hiking.html" class="active">徒步</a>
+                <a href="yanxing.html">岩行中国</a>
+                <a href="about.html">关于</a>
+            </div>
+            <button class="theme-btn" onclick="toggleTheme()" title="切换主题">🌙</button>
+            <button class="nav-toggle" onclick="document.getElementById('navLinks').classList.toggle('show')">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <section class="hiking-hero">
+        <div class="container">
+            <h1>徒步</h1>
+            <p>用脚步丈量山野，分享徒步攻略与经验</p>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="filters" id="hikingFilters">
+                <button class="filter-btn active" data-cat="all">全部</button>
+                <button class="filter-btn" data-cat="徒步攻略">徒步攻略</button>
+                <button class="filter-btn" data-cat="经验分享">经验分享</button>
+                <button class="filter-btn" data-cat="装备推荐">装备推荐</button>
+                <button class="filter-btn" data-cat="路线推荐">路线推荐</button>
+            </div>
+            <div class="posts-grid" id="hikingGrid"></div>
+            <div class="hiking-empty" id="hikingEmpty" style="display:none;">
+                <div class="empty-icon">🥾</div>
+                <p>暂无徒步内容</p>
+                <p style="font-size:0.8rem;color:var(--text-muted);">博主正在路上，精彩内容即将上线</p>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-inner">
+            <div class="footer-brand"><span>岩</span>行记</div>
+            <div class="footer-links">
+                <a href="index.html">首页</a>
+                <a href="blog.html">文章</a>
+                <a href="techniques.html">技术分享</a>
+                <a href="hiking.html">徒步</a>
+                <a href="yanxing.html">岩行中国</a>
+                <a href="about.html">关于</a>
+            </div>
+            <p class="footer-copy">© 2026 岩行记</p>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script src="js/admin.js"></script>
+    <script>
+        var hikingSubFilter = 'all';
+
+        function renderHikingGrid(filter) {
+            filter = filter || hikingSubFilter;
+            hikingSubFilter = filter;
+
+            var container = document.getElementById('hikingGrid');
+            var empty = document.getElementById('hikingEmpty');
+            if (!container) return;
+
+            // 从 POSTS 中筛选徒步相关文章
+            var hikingPosts = POSTS.filter(function(p) {
+                var hikingCats = ['徒步', '徒步攻略', '经验分享', '装备推荐', '路线推荐'];
+                return hikingCats.indexOf(p.category) !== -1;
+            });
+
+            // 排除隐藏文章（除非是作者）
+            var showHidden = sessionStorage.getItem('editor_auth') === '1';
+            if (!showHidden) {
+                hikingPosts = hikingPosts.filter(function(p) { return !p.hidden; });
+            }
+
+            // 子分类筛选
+            if (filter !== 'all') {
+                hikingPosts = hikingPosts.filter(function(p) { return p.category === filter; });
+            }
+
+            if (!hikingPosts.length) {
+                container.innerHTML = '';
+                empty.style.display = 'block';
+                return;
+            }
+            empty.style.display = 'none';
+
+            container.innerHTML = hikingPosts.map(function(p) {
+                var d = new Date(p.date).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+                var hiddenTag = (showHidden && p.hidden) ? '<span class="post-hidden-tag">已隐藏</span>' : '';
+                return '<article class="post-card' + (p.hidden && showHidden ? ' hidden-card' : '') + '">' +
+                    '<div class="post-thumb" style="background: ' + (p.bg || 'linear-gradient(135deg, #1a3a2a, #0f3422)') + ';">' +
+                        '<span>' + (p.emoji || '🥾') + '</span>' +
+                    '</div>' +
+                    '<div class="post-body">' +
+                        '<div class="post-meta">' +
+                            '<span class="post-date">' + d + '</span>' +
+                            '<span class="post-tag">' + p.category + '</span>' +
+                            hiddenTag +
+                        '</div>' +
+                        '<h3 class="post-title">' + p.title + '</h3>' +
+                        '<p class="post-excerpt">' + (p.excerpt || '') + '</p>' +
+                        '<a href="' + p.url + '" class="post-more">阅读全文 →</a>' +
+                    '</div>' +
+                '</article>';
+            }).join('');
+        }
+
+        document.getElementById('hikingFilters').addEventListener('click', function(e) {
+            if (e.target.classList.contains('filter-btn')) {
+                document.querySelectorAll('#hikingFilters .filter-btn').forEach(function(b) { b.classList.remove('active'); });
+                e.target.classList.add('active');
+                renderHikingGrid(e.target.dataset.cat);
+            }
+        });
+
+        renderHikingGrid();
+    </script>
+</body>
+</html>
