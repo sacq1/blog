@@ -142,6 +142,7 @@ function renderLatest() {
     if (!container) return;
     // 排除隐藏文章
     var visible = POSTS.filter(function(p) { return !p.hidden; });
+    visible.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
     container.innerHTML = visible.slice(0, 3).map(function(p) {
         var d = new Date(p.date).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
         return '<article class="post-card">' +
@@ -188,19 +189,22 @@ function renderLatest() {
 })();
 
 // ==================== 自动刷新 ====================
-var lastCheck = Date.now();
-setInterval(function() {
-    var xhr = new XMLHttpRequest();
-    xhr.open('HEAD', window.location.href + '?t=' + Date.now(), true);
-    xhr.onload = function() {
-        var lm = xhr.getResponseHeader('Last-Modified');
-        if (lm && localStorage.getItem('last_modified') && lm !== localStorage.getItem('last_modified')) {
-            location.reload();
-        }
-        if (lm) localStorage.setItem('last_modified', lm);
-    };
-    xhr.send();
-}, 30000);
+(function initPoll() {
+    var pollKey = 'last_modified_' + window.location.pathname;
+    setInterval(function() {
+        var xhr = new XMLHttpRequest();
+        xhr.open('HEAD', window.location.href, true);
+        xhr.timeout = 5000;
+        xhr.onload = function() {
+            var lm = xhr.getResponseHeader('Last-Modified');
+            if (lm && localStorage.getItem(pollKey) && lm !== localStorage.getItem(pollKey)) {
+                location.reload();
+            }
+            if (lm) localStorage.setItem(pollKey, lm);
+        };
+        xhr.send();
+    }, 30000);
+})();
 
 // ==================== 初始化 ====================
 document.addEventListener('DOMContentLoaded', function() {

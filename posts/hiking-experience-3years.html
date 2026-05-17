@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache">
     <title>我的徒步三年：从新手到独行侠 | 岩行记</title>
     <link rel="stylesheet" href="../css/style.css">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛰️</text></svg>">
@@ -11,7 +12,7 @@
     <nav class="nav">
         <div class="nav-inner">
             <a href="../index.html" class="nav-brand"><span>岩</span>行记</a>
-            <div class="nav-links">
+            <div class="nav-links" id="navLinks">
                 <a href="../index.html">首页</a>
                 <a href="../blog.html">文章</a>
                 <a href="../techniques.html">技术分享</a>
@@ -19,8 +20,10 @@
                 <a href="../yanxing.html">岩行中国</a>
                 <a href="../about.html">关于</a>
             </div>
-            <button class="theme-btn" onclick="toggleTheme()">🌙</button>
-        </div>
+            <button class="theme-btn" onclick="toggleTheme()" title="切换主题">🌙</button>
+            <button class="nav-toggle" onclick="document.getElementById('navLinks').classList.toggle('show')">
+                <span></span><span></span><span></span>
+            </button>
     </nav>
 
     <section class="article-head">
@@ -83,10 +86,17 @@
     <footer class="footer">
         <div class="footer-inner">
             <div class="footer-brand"><span>岩</span>行记</div>
+            <div class="footer-links">
+                <a href="../index.html">首页</a>
+                <a href="../blog.html">文章</a>
+                <a href="../techniques.html">技术分享</a>
+                <a href="../hiking.html">徒步</a>
+                <a href="../yanxing.html">岩行中国</a>
+                <a href="../about.html">关于</a>
+            </div>
             <p class="footer-copy">© 2026 岩行记</p>
         </div>
     </footer>
     <script src="../js/main.js"></script>
-    <script src="../js/admin.js"></script>
 </body>
 </html>

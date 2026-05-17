@@ -324,10 +324,14 @@
     }
 
     function putBinary(path, base64data, message) {
-        return ghAPI('PUT', path, {
-            message: message,
-            content: base64data.split(',')[1] || base64data,
-            branch: BRANCH
+        var encoded = base64data.split(',')[1] || base64data;
+        return getFile(path).then(function(r) {
+            return ghAPI('PUT', path, {
+                message: message,
+                content: encoded,
+                branch: BRANCH,
+                sha: r.sha || undefined
+            });
         });
     }
 

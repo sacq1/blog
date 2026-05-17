@@ -78,7 +78,6 @@
     <script src="js/main.js"></script>
     <script src="js/admin.js"></script>
     <script>
-        var TECH_PASS = 'LBS20040816';
         var isAuthor = sessionStorage.getItem('admin_auth') === '1';
 
         // ==================== 数据管理 ====================
@@ -211,12 +210,7 @@
             });
         });
 
-        // ==================== 作者登录 ====================
-        if (sessionStorage.getItem('admin_auth') === '1') {
-            isAuthor = true;
-        }
-
-        // ==================== 初始化 ====================
+        // 初始化
         loadTechniques();
         renderTechniques();
 

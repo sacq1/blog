@@ -70,6 +70,7 @@
     <script src="js/main.js"></script>
     <script src="js/admin.js"></script>
     <script>
+        (function() {
         var hikingSubFilter = 'all';
 
         function renderHikingGrid(filter) {
@@ -134,6 +135,7 @@
         });
 
         renderHikingGrid();
+        })();
     </script>
 </body>
 </html>
