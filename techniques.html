@@ -79,7 +79,7 @@
     <script src="js/admin.js"></script>
     <script>
         var TECH_PASS = 'LBS20040816';
-        var isAuthor = sessionStorage.getItem('techniques_auth') === '1';
+        var isAuthor = sessionStorage.getItem('admin_auth') === '1';
 
         // ==================== 数据管理 ====================
         var TECHNIQUES = [];
@@ -212,7 +212,7 @@
         });
 
         // ==================== 作者登录 ====================
-        if (sessionStorage.getItem('techniques_auth') === '1') {
+        if (sessionStorage.getItem('admin_auth') === '1') {
             isAuthor = true;
         }
 

@@ -14,6 +14,7 @@
     --gold-dim: rgba(201,168,76,0.15);
     --gold-glow: rgba(201,168,76,0.25);
     --border: rgba(255,255,255,0.06);
+    --shadow: 0 4px 20px rgba(0,0,0,0.3);
     --radius: 8px;
     --trans: 0.25s ease;
 }
@@ -30,6 +31,7 @@
     --gold-dim: rgba(139,105,20,0.08);
     --gold-glow: rgba(139,105,20,0.15);
     --border: rgba(0,0,0,0.08);
+    --shadow: 0 4px 20px rgba(0,0,0,0.1);
 }
 
 html { font-size: 16px; scroll-behavior: smooth; }

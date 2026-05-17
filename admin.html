@@ -294,16 +294,30 @@
         });
     }
 
+    function decodeBase64(str) {
+        var binary = atob(str.replace(/\s/g, ''));
+        var bytes = new Uint8Array(binary.length);
+        for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        return new TextDecoder().decode(bytes);
+    }
+
+    function encodeBase64(str) {
+        var bytes = new TextEncoder().encode(str);
+        var binary = '';
+        for (var i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+        return btoa(binary);
+    }
+
     function getFile(path) {
         return ghAPI('GET', path).then(function(r) {
-            return { content: r.content ? decodeURIComponent(escape(atob(r.content.replace(/\s/g, '')))) : '', sha: r.sha };
+            return { content: r.content ? decodeBase64(r.content) : '', sha: r.sha };
         }).catch(function() { return { content: '', sha: '' }; });
     }
 
     function putFile(path, content, message, sha) {
         return ghAPI('PUT', path, {
             message: message,
-            content: btoa(unescape(encodeURIComponent(content))),
+            content: encodeBase64(content),
             branch: BRANCH,
             sha: sha || undefined
         });
@@ -336,7 +350,7 @@
     function pullArticles() {
         getFile('js/main.js').then(function(r) {
             var match = r.content.match(/DEFAULT_POSTS\s*=\s*(\[[\s\S]*?\]);/);
-            if (match) { articles = eval('(' + match[1] + ')'); }
+            if (match) {             articles = JSON.parse(match[1]); }
             renderArticles();
             toast('文章列表已从 GitHub 拉取');
         }).catch(function(e) { toast('拉取失败: ' + e.message); });

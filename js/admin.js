@@ -1,10 +1,12 @@
 var ADMIN_PASS = 'LBS20040816';
 
-var isTechniquesPage = window.location.pathname.indexOf('techniques.html') !== -1;
+var isAdminPage = window.location.pathname.indexOf('admin.html') !== -1;
+var isPostPage = window.location.pathname.indexOf('/posts/') !== -1;
+var isEditorPage = isAdminPage || isPostPage;
 
 // ==================== 应用本地编辑（普通用户可见） ====================
 (function applyEdits() {
-    if (isTechniquesPage) return;
+    if (isEditorPage) return;
     try {
         var edits = JSON.parse(localStorage.getItem('inline_edits') || '{}');
         if (edits.heroDesc) { var hd = document.querySelector('.hero-desc'); if (hd) hd.textContent = edits.heroDesc; }
@@ -21,7 +23,7 @@ var isTechniquesPage = window.location.pathname.indexOf('techniques.html') !== -
 
 // ==================== 管理员模式 ====================
 (function initAdmin() {
-    if (isTechniquesPage) return;
+    if (isEditorPage) return;
 
     var isAdmin = sessionStorage.getItem('admin_auth') === '1';
 

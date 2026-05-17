@@ -87,7 +87,7 @@
             });
 
             // 排除隐藏文章（除非是作者）
-            var showHidden = sessionStorage.getItem('editor_auth') === '1';
+            var showHidden = sessionStorage.getItem('admin_auth') === '1';
             if (!showHidden) {
                 hikingPosts = hikingPosts.filter(function(p) { return !p.hidden; });
             }

@@ -31,7 +31,6 @@ function updateThemeIcon() {
 // ==================== 文章数据 ====================
 const DEFAULT_POSTS = [
     {
-    {
         "title": "从徒步到攀岩，我决定去爬墙了",
         "excerpt": "徒步走了3年，走过梅里雪山的冰川，走过齐云山的云海。直到有一天，我站在一面岩壁下面……",
         "date": "2026-05-10",
@@ -111,7 +110,7 @@ function renderPosts(containerId, filter) {
     });
 
     // 排除隐藏文章
-    var showHidden = sessionStorage.getItem('editor_auth') === '1';
+    var showHidden = sessionStorage.getItem('admin_auth') === '1';
     if (!showHidden) {
         filtered = filtered.filter(function(p) { return !p.hidden; });
     }
